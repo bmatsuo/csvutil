@@ -1,0 +1,24 @@
+csv version 0.0_1
+=======================================================================
+
+ABOUT csv
+DEPENDENCIES
+
+    You must have Go installed (http://golang.org/) and the $GOROOT
+    environment variable must be set to the Go source root directory.
+
+INSTALLATION
+
+    The following command will install csv into the path
+    $GOROOT/pkg/ARCH, where ARCH is your current architecture.
+
+        gomake install
+
+AUTHOR
+
+    Bryan Matsuo <bmatsuo@soe.ucsc.edu>
+
+COPYRIGHT & LICENSE
+
+    (C) Bryan Matsuo 
+    TODO - add licensing information!
