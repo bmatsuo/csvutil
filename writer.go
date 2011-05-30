@@ -1,8 +1,9 @@
 package csvutil
 /* 
-*  File: csv.go
+*  File: writer.go
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
 *  Created: Sat May 28 23:53:36 PDT 2011
+*  Description: CSV writer library.
 */
 import (
     "os"
@@ -11,14 +12,14 @@ import (
     "utf8"
 )
 
-/* A simple CSV file writer. */
+// A simple CSV file writer.
 type Writer struct {
     Sep int "CSV Field seperator."
     w io.Writer "Base writer object."
     bw *bufio.Writer "Buffered writer object"
 }
 
-/* Create a new CSV writer with the default field seperator */
+//  Create a new CSV writer with the default field seperator
 func NewWriter(w io.Writer) *Writer {
     csvw := new(Writer)
     csvw.Sep = DEFAULT_SEP
