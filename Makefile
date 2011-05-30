@@ -7,7 +7,7 @@
 
 include $(GOROOT)/src/Make.inc
 
-TARG=csvutils
+TARG=csvutil
 GOFILES=\
 	csv.go\
 	reader.go\

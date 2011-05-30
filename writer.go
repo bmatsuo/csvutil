@@ -10,6 +10,7 @@ import (
     "io"
     "bufio"
     "utf8"
+    "fmt"
 )
 
 // A simple CSV file writer.
@@ -46,12 +47,12 @@ func (csvw *Writer) WriteFields(fields []string) (int, os.Error) {
     var success int = 0
     var err os.Error
     for i:=0 ; i<n ; i++ {
-        nbytes, err := csvw.bw.WriteString(fields[i])
+        nbytes, err := fmt.Fprint(csvw.w,fields[i])
         success += nbytes
         if nbytes < len(fields[i]) {
             return success, err
         }
-        nbytes, err = csvw.bw.WriteRune(csvw.Sep)
+        nbytes, err = fmt.Fprintf(csvw.w, "%c",csvw.Sep)
         success += nbytes
         if nbytes < utf8.RuneLen(csvw.Sep) {
             return success, err
@@ -74,13 +75,14 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
         }
     }
     if n >= 1 {
-        nbytes, err = csvw.bw.WriteString(fields[n-1])
+        nbytes, err = fmt.Fprint(csvw.w, fields[n-1])
+        //nbytes, err = csvw.bw.WriteString(fields[n-1])
         success += nbytes
         if nbytes != len(fields[n-1]) {
             return success, err
         }
     }
-    nbytes, err = csvw.bw.WriteRune('\n')
+    nbytes, err = fmt.Fprintf(csvw.w, "%c", '\n')
     success += nbytes
     return success, err
     /*
@@ -116,4 +118,9 @@ func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
         }
     }
     return success, err
+}
+
+// Flush any unwritten buffered data to the underlying io.Writer.
+func (csvw *Writer) Flush () os.Error {
+    return csvw.bw.Flush()
 }
