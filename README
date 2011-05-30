@@ -2,7 +2,7 @@
 
 VERSION
 
-    This is csutil version 0.0_2
+    This is csutil version 0.0_3
 
 SYNOPSIS
 
@@ -11,14 +11,16 @@ SYNOPSIS
         import "github.com/bmatsuo/csvutil"
         reader := csvutil.NewReader(os.Stdin)
         reader.Trim = true
+        writer := csvutil.NewWriter(os.Stdout)
         for r := range reader.EachRow() {
-            // ...
-            // Process the CSV row fields.
-            // ...
+            if r.Error != nil {
+                panic(r.Error)
+            }
+            write.WriteFieldsln(r)
         }
 
 INSTALL
 
-    The easiest installation of csvutil is done through goinstall
+    The easiest installation of csvutil is done through goinstall.
 
         goinstall github.com/bmatsuo/csvutil
