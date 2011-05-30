@@ -69,7 +69,9 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
     var err os.Error
     if n > 1 {
         success, err = csvw.WriteFields(fields[:n-1])
-        if err != nil { return success, err }
+        if err != nil {
+            return success, err
+        }
     }
     if n >= 1 {
         nbytes, err = csvw.bw.WriteString(fields[n-1])
