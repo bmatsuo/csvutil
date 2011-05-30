@@ -11,5 +11,6 @@ TARG=csvutils
 GOFILES=\
 	csv.go\
 	reader.go\
+	writer.go\
 
 include $(GOROOT)/src/Make.pkg

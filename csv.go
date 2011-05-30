@@ -1,29 +1,21 @@
-// csvutils - CSV file utilities for the Go programming language.
+//  CSV file utilities for the Go programming language.
 //
-// VERSION
-//	
-//  This is csutils version iteration 0.0_2
+//  This is csutils version 0.0_2
 //
-// SYNOPSIS
-//
-//  The "csvutils" package can be used to read CSV files from a io.Reader.
-//
-//      reader := csvutils.NewReader(os.Stdin)
-//      reader.Trim = true
-//      for r := range reader.EachRow() {
-//          if r.Error == nil {
-//              break
-//          }
-//          var fields []string = r.Fields
-//          // ...
-//          // Process the CSV row fields.
-//          // ...
-//      }
-package csvutils
+package csvutil
 /* 
 *  File: csv.go
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
 *  Created: Sat May 28 23:53:36 PDT 2011
 */
 import (
+)
+
+//  The default CSV field separator is a comma ','. By default, field
+//  trimming is turned off for csvutil's I/O objects. But, when active,
+//  the default cutset is " \t", that is, (ASCII) whitespace.
+const (
+	DEFAULT_SEP  = ','
+	DEFAULT_TRIM = false
+	DEFAULT_CUTSET = " \t"
 )

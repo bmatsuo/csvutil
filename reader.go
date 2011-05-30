@@ -1,4 +1,4 @@
-package csvutils
+package csvutil
 /* 
 *  File: reader.go
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
@@ -12,20 +12,18 @@ import (
 	"os"
 )
 
-const (
-	DEFAULT_SEP  = ','
-	DEFAULT_TRIM = false
-	DEFAULT_CUTSET = " \t"
-)
-
+//  A reader object for CSV data utilizing the bufio package.
 type Reader struct {
-	Sep int "Seperator character."
+	Sep int "Field separator character."
 	Trim bool "Remove excess whitespace from field values."
 	Cutset string "Set of characters to trim."
 	r io.Reader "Base reader object."
 	br *bufio.Reader "For reading lines."
 }
 
+//  A simple row structure for rows read by a csvutil.Reader that
+//  encapsulates any read error enountered along with any data read
+//  prior to encountering an error.
 type Row struct {
 	Fields []string "CSV row field data"
 	Error os.Error "Error encountered reading"
@@ -38,6 +36,7 @@ func mkrow(fields []string, err os.Error) Row {
 	return r
 }
 
+//  Create a new reader object.
 func NewReader(r io.Reader) *Reader {
 	var csvr *Reader = new(Reader).Reset()
 	csvr.r = r
@@ -45,8 +44,8 @@ func NewReader(r io.Reader) *Reader {
 	return csvr
 }
 
+//  Create a new reader with a buffer of a specified size.
 func NewReaderSize(r io.Reader, size int) *Reader {
-	/* Create a new csv.Reader with a specified buffer size. */
 	var csvr *Reader = new(Reader).Reset()
 	csvr.r = r
 	var err os.Error
@@ -55,6 +54,7 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 	return csvr
 }
 
+// Read up to a new line and return a slice of string slices
 func (csvr *Reader) ReadRow() Row {
 	/* Read one row of the CSV and and return an array of the fields. */
 	var r Row
@@ -77,6 +77,15 @@ func (csvr *Reader) ReadRow() Row {
 	return r
 }
 
+//  A function with a concurrent routine for iterating through all
+//  remaining rows of CSV data until EOF is encountered.
+//      for r := reader.EachRow() {
+//          if r.Error != nil {
+//              panic(r.Error)
+//          }
+//          var fields []string = r.Fields
+//          // Process the desired entries of "fields".
+//      }
 func (csvr *Reader) EachRow() <-chan Row {
 	/* Generator function for iterating through rows. */
 	var c chan Row = make(chan Row)
@@ -98,6 +107,8 @@ func (csvr *Reader) EachRow() <-chan Row {
 	return c
 }
 
+//  A function routine for setting all the configuration variables of a
+//  csvutil.Reader in a single line.
 func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
 	csvr.Sep = sep
 	csvr.Trim = trim
@@ -105,11 +116,15 @@ func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
 	return csvr
 }
 
+// Reset a Reader's configuration to the defaults. This is mostly meant
+// for internal use but is safe for general use.
 func (csvr *Reader) Reset() *Reader {
 	return csvr.Configure(DEFAULT_SEP, DEFAULT_TRIM, DEFAULT_CUTSET)
 }
 
 /* Comply with the reader interface. */
+/*
 func (csvr*Reader) Read(b []byte) (n int, err os.Error) {
 	return csvr.r.Read(b)
 }
+*/
