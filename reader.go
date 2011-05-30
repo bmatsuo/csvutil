@@ -77,6 +77,57 @@ func (csvr *Reader) ReadRow() Row {
 	return r
 }
 
+
+//  Read rows into a preallocated buffer. Any error encountered is
+//  returned.
+func (csvr *Reader) ReadRows(rbuf [][]string) (err os.Error) {
+    var(
+        i int = 0
+        n int = len(rbuf)
+    )
+    err = nil
+    for r := range csvr.EachRow() {
+        if i == n - 1 {
+            break
+        }
+        if r.Error != nil {
+            err = r.Error
+            if r.Fields != nil {
+                rbuf[i] = r.Fields
+            }
+            break
+        }
+        rbuf[i] = r.Fields
+    }
+    return err
+}
+
+//  Reads any remaining rows of CSV data in the underlying io.Reader.
+//  Uses concecutive doubling when a preallocated buff of rows fills.
+//  Up to 16 rows can be read without any doubling occuring.
+func (csvr *Reader) ReadRemainingRows() (rows [][]string, err os.Error) {
+    err = nil
+    var rbuf [][]string = make([][]string, 0, 16)
+    for r := range csvr.EachRow() {
+        /*
+        if cap(rbuf) == len(rbuf) {
+            newbuf := make([][]string, len(rbuf), 2*len(rbuf))
+            copy(rbuf,newbuf)
+            rbuf = newbuf
+        }
+        */
+        if r.Error != nil {
+            err = r.Error
+            if r.Fields != nil {
+                rbuf = append(rbuf, r.Fields)
+            }
+            break
+        }
+        rbuf = append(rbuf, r.Fields)
+    }
+    return rbuf, err
+}
+
 //  A function with a concurrent routine for iterating through all
 //  remaining rows of CSV data until EOF is encountered.
 //      for r := reader.EachRow() {

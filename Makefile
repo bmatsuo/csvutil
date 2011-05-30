@@ -12,5 +12,6 @@ GOFILES=\
 	csv.go\
 	reader.go\
 	writer.go\
+	file.go\
 
 include $(GOROOT)/src/Make.pkg
