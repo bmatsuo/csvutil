@@ -37,7 +37,7 @@ func ReadFile(filename string) (rows [][]string, err os.Error) {
         return rows, err
     }
     csvr = NewReader(in)
-    rows, err = csvr.ReadRemainingRows()
+    rows, err = csvr.RemainingRows()
     if err != nil {
         return rows, err
     }

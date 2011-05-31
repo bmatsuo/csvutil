@@ -17,6 +17,7 @@ type Reader struct {
 	Sep int "Field separator character."
 	Trim bool "Remove excess whitespace from field values."
 	Cutset string "Set of characters to trim."
+    LastRow Row "The last row read by the Reader."
 	r io.Reader "Base reader object."
 	br *bufio.Reader "For reading lines."
 }
@@ -54,10 +55,11 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 	return csvr
 }
 
-// Read up to a new line and return a slice of string slices
+//  Read up to a new line and return a slice of string slices
 func (csvr *Reader) ReadRow() Row {
 	/* Read one row of the CSV and and return an array of the fields. */
-	var r Row
+	r := Row{Fields:nil, Error:nil}
+    csvr.LastRow = r
 	line, isPrefix, err := csvr.br.ReadLine()
 	r.Fields = nil
 	r.Error = err
@@ -74,22 +76,23 @@ func (csvr *Reader) ReadRow() Row {
 		}
 	}
 	r.Fields = fields
+    csvr.LastRow = r
 	return r
 }
 
 
 //  Read rows into a preallocated buffer. Any error encountered is
-//  returned.
-func (csvr *Reader) ReadRows(rbuf [][]string) (err os.Error) {
+//  returned. Returns the number of rows read in a single value return
+//  context any errors encountered (including os.EOF).
+func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
     var(
-        i int = 0
+        err os.Error
+        numRead int = 0
         n int = len(rbuf)
     )
-    err = nil
-    for r := range csvr.EachRow() {
-        if i == n - 1 {
-            break
-        }
+    for i:=0 ; i<n ; i++ {
+        r := csvr.ReadRow()
+        numRead++
         if r.Error != nil {
             err = r.Error
             if r.Fields != nil {
@@ -99,15 +102,29 @@ func (csvr *Reader) ReadRows(rbuf [][]string) (err os.Error) {
         }
         rbuf[i] = r.Fields
     }
-    return err
+    return numRead, err
+}
+
+//  Convenience methor to read at most n rows from csvr. Simple allocates
+//  a row slice rs and calls csvr.ReadRows(rs). Returns the actual number
+//  of rows read and any error that occurred (and halted reading).
+func (csvr *Reader) ReadNRows(n int) (int, os.Error) {
+    rows := make([][]string, n)
+    return csvr.ReadRows(rows)
 }
 
 //  Reads any remaining rows of CSV data in the underlying io.Reader.
-//  Uses concecutive doubling when a preallocated buff of rows fills.
-//  Up to 16 rows can be read without any doubling occuring.
-func (csvr *Reader) ReadRemainingRows() (rows [][]string, err os.Error) {
+//  Uses resizing when a preallocated buffer of rows fills. Up to 16
+//  rows can be read without any doubling occuring.
+func (csvr *Reader) RemainingRows() (rows [][]string, err os.Error) {
+    return csvr.RemainingRowsSize(16)
+}
+
+//  Like csvr.RemainingRows(), but allows specification of the initial
+//  row buffer capacity.
+func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) {
     err = nil
-    var rbuf [][]string = make([][]string, 0, 16)
+    var rbuf [][]string = make([][]string, 0, size)
     for r := range csvr.EachRow() {
         /*
         if cap(rbuf) == len(rbuf) {
@@ -130,18 +147,48 @@ func (csvr *Reader) ReadRemainingRows() (rows [][]string, err os.Error) {
 
 //  A function with a concurrent routine for iterating through all
 //  remaining rows of CSV data until EOF is encountered.
-//      for r := reader.EachRow() {
+//      for r := range reader.EachRow() {
 //          if r.Error != nil {
 //              panic(r.Error)
 //          }
 //          var fields []string = r.Fields
 //          // Process the desired entries of "fields".
 //      }
+//  This method utilizes a goroutine, and has the distict possibilty
+//  of 'losing' at least one row when breaking of the of the iterating
+//  loop. This can be managed by explicitly handling channel returned by
+//  reader.EachRow() and closing/extracting the channel after the loop.
+//      ch := reader.EachRow()
+//      for r := range ch {
+//          if r.Error != nil {
+//              panic(r.Error)
+//          }
+//          // Process the desired entries of "fields".
+//          if r.Fields[3] == "5" {
+//              close(ch)
+//              break
+//          }
+//      }
+//      chrow, ok := <- ch
+//      if ok {
+//          // There was an extra row in the channel
+//      }
+//      panicrow := reader.LastRow
+//      // Continue program execution.
+//  However this method is simply recommended for use only when the
+//  program needs to iteratively handle all remaining content of the
+//  Reader.
 func (csvr *Reader) EachRow() <-chan Row {
 	/* Generator function for iterating through rows. */
-	var c chan Row = make(chan Row)
+    c := make(chan Row)
 	var read_rows = func (c chan<- Row) {
+        defer func() {
+            if x:=recover(); x!=nil {
+                /* Do nothing. */
+            }
+        } ()
 		for true {
+            csvr.LastRow = Row{Fields:nil, Error:nil}
 			var r Row = csvr.ReadRow()
 			if r.Fields == nil {
 				if r.Error == os.EOF {
@@ -150,6 +197,7 @@ func (csvr *Reader) EachRow() <-chan Row {
 					panic(r.Error)
 				}
 			}
+            csvr.LastRow = r
 			c <- r
 		}
 		close(c)
@@ -167,8 +215,8 @@ func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
 	return csvr
 }
 
-// Reset a Reader's configuration to the defaults. This is mostly meant
-// for internal use but is safe for general use.
+//  Reset a Reader's configuration to the defaults. This is mostly meant
+//  for internal use but is safe for general use.
 func (csvr *Reader) Reset() *Reader {
 	return csvr.Configure(DEFAULT_SEP, DEFAULT_TRIM, DEFAULT_CUTSET)
 }
