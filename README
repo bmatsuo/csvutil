@@ -43,8 +43,6 @@ FEATURES
 
 TODO
 
-    Cleaner iteration to handle partial iteration of a stream.
-
     Iteration of individual fields from a CSV data stream with a flag that
     indicates new rows.
 
