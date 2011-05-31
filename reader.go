@@ -39,10 +39,44 @@ func mkrow(fields []string, err os.Error) Row {
 }
 
 //  An object for iterating over the rows of a Reader.
+//      rit = reader.RowIterAuto()
+//      for r := range reader.RowsChan {
+//          if r.Error != nil {
+//              panic(r.Error)
+//          }
+//          var fields []string = r.Fields
+//          // Process the desired entries of "fields".
+//          rit.Next()
+//      }
+//  The (*Reader) RowIterAuto() (*RowReaderIterator) method creates a
+//  new iterator object and immediately reads a row from the Reader.
+//  If this behavior is not desired, use the underlying alternate method
+//  (*Reader) RowIter() (*RowReaderIterator).
 type ReaderRowIterator struct {
     stopped bool
     RowsChan <-chan Row
     control chan<- bool
+}
+
+//  A ReaderRowIterator meant for reading until the end of the
+//  data stream of the corresponding Reader's io.Reader. 
+//      rit = reader.RowIterAuto()
+//      for r := range reader.RowsChan {
+//          if r.Error != nil {
+//              panic(r.Error)
+//          }
+//          var fields []string = r.Fields
+//          // Process the desired entries of "fields".
+//      }
+//  This iteration using a range statement as above, it is not safe to
+//  break out of the loop. This generally causes the 'loss' of at least
+//  one row.
+//
+//  For iterating rows in a way such that the iteration can be stopped
+//  safely, use ReaderRowIterator objects instead.
+type ReaderRowIteratorAuto struct {
+    stopped bool
+    RowsChan <-chan Row
 }
 
 //  Tell the iterator to get another row from the Reader.
@@ -120,7 +154,6 @@ func (csvr *Reader) RowIter() (*ReaderRowIterator) {
 	go read_rows(throughChan, controlChan)
 	return ri
 }
-
 //  For convenience, return a new ReaderRowIterator rit that has
 //  already already been the target of (*ReaderRowIterator) Next().
 func (csvr *Reader) RowIterStarted() (rit *ReaderRowIterator) {
@@ -128,6 +161,37 @@ func (csvr *Reader) RowIterStarted() (rit *ReaderRowIterator) {
     rit.Next()
     return rit
 }
+
+// Create a new ReaderRowIteratorAuto object and return it.
+func (csvr *Reader) RowIterAuto() (*ReaderRowIteratorAuto) {
+    ri := new(ReaderRowIteratorAuto)
+    throughChan := make(chan Row)
+    ri.RowsChan = throughChan
+	var read_rows = func (r chan<- Row) {
+        defer func() {
+            if x:=recover(); x!=nil {
+                /* Do nothing. */
+            }
+        } ()
+		for true {
+            csvr.LastRow = Row{Fields:nil, Error:nil}
+			var row Row = csvr.ReadRow()
+			if row.Fields == nil {
+				if row.Error == os.EOF {
+					break
+				} else {
+					panic(row.Error)
+				}
+			}
+            csvr.LastRow = row
+			r <- row
+		}
+		close(r)
+	}
+	go read_rows(throughChan)
+	return ri
+}
+
 
 //  Read up to a new line and return a slice of string slices
 func (csvr *Reader) ReadRow() Row {
@@ -219,7 +283,8 @@ func (csvr *Reader) RemainingRows() (rows [][]string, err os.Error) {
 func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) {
     err = nil
     var rbuf [][]string = make([][]string, 0, size)
-    for r := range csvr.EachRow() {
+    rit := csvr.RowIterAuto()
+    for r := range rit.RowsChan {
         /*
         if cap(rbuf) == len(rbuf) {
             newbuf := make([][]string, len(rbuf), 2*len(rbuf))
@@ -239,46 +304,14 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
     return rbuf, err
 }
 
-//  A function with a concurrent routine for iterating through all
-//  remaining rows of CSV data until EOF is encountered.
-//      for r := range reader.EachRow() {
-//          if r.Error != nil {
-//              panic(r.Error)
-//          }
-//          var fields []string = r.Fields
-//          // Process the desired entries of "fields".
-//      }
-//  This method utilizes a goroutine, and has the distict possibilty
-//  of 'losing' at least one row when breaking of the of the iterating
-//  loop. This can be managed by explicitly handling channel returned by
-//  reader.EachRow() and closing/extracting the channel after the loop.
-//      ch := reader.EachRow()
-//      for r := range ch {
-//          if r.Error != nil {
-//              panic(r.Error)
-//          }
-//          // Process the desired entries of "fields".
-//          if r.Fields[3] == "5" {
-//              close(ch)
-//              break
-//          }
-//      }
-//      chrow, ok := <- ch
-//      if ok {
-//          // There was an extra row in the channel
-//      }
-//      panicrow := reader.LastRow
-//      // Continue program execution.
-//  However this method is simply recommended for use only when the
-//  program needs to iteratively handle all remaining content of the
-//  Reader.
+/*
 func (csvr *Reader) EachRow() <-chan Row {
-	/* Generator function for iterating through rows. */
+	// Generator function for iterating through rows.
     c := make(chan Row)
 	var read_rows = func (c chan<- Row) {
         defer func() {
             if x:=recover(); x!=nil {
-                /* Do nothing. */
+                // Do nothing.
             }
         } ()
 		for true {
@@ -299,6 +332,7 @@ func (csvr *Reader) EachRow() <-chan Row {
 	go read_rows(c)
 	return c
 }
+*/
 
 //  A function routine for setting all the configuration variables of a
 //  csvutil.Reader in a single line.

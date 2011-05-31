@@ -22,7 +22,7 @@ func TestReadRow (T *testing.T) {
     rows = make([][]string, n) // Expect a square matrix.
     rows[0] = headrow.Fields
     var i int = 1
-    rit := csvr.RowIterStarted()
+    rit := csvr.RowIterAuto()
     for row := range rit.RowsChan {
         var k int = len(row.Fields)
         if k != n {
@@ -37,7 +37,6 @@ func TestReadRow (T *testing.T) {
         }
         rows[i] = row.Fields
         i++
-        rit.Next()
     }
     var test_matrix [][]string = makeTestCSVMatrix()
     var assert_val = func (i,j int) {
