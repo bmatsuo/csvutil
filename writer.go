@@ -24,7 +24,6 @@ import (
     "os"
     "io"
     "utf8"
-    "fmt"
     "strings"
 )
 
@@ -62,7 +61,15 @@ func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
 //  Attempt to write a string to underlying io.Writer, but panic if a
 //  separator character found in the stream.
 func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
-    var sep string = fmt.Sprintf("%c", csvw.Sep)
+    // Some code modified from
+    //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
+    var rb []byte = make([]byte,utf8.UTFMax)
+	/* Do I want int64 separators?
+        rune := int(c) 
+	    if int64(rune) != c { rune = utf8.RuneError }
+    */
+	w := utf8.EncodeRune(rb, csvw.Sep)
+    var sep string = string(rb[0:w])
     var i int = strings.Index(str, sep)
     if i != -1 {
         panic("sepfound")
@@ -81,7 +88,18 @@ func (csvw *Writer) WriteField(field string, ln bool) (nbytes int, err os.Error)
     } else {
         trailChar = csvw.Sep
     }
-    return fmt.Fprintf(csvw.w,"%s%c",field, trailChar)
+    // Some code modified from
+    //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
+    var rb []byte = make([]byte,utf8.UTFMax) // A utf8 rune buffer.
+	/* Do I want int64 separators? 
+        rune := int(c) 
+	    if int64(rune) != c { rune = utf8.RuneError }
+    */
+	rbLen := utf8.EncodeRune(rb, trailChar)
+    var fLen int = len(field)
+    var bp []byte = make([]byte, fLen, fLen + rbLen)
+    copy(bp, field)
+    return csvw.Write(append(bp, rb[0:rbLen]...))
 }
 
 //  Write a slice of field values with a trailing field seperator and no '\n'.
