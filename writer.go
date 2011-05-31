@@ -41,7 +41,7 @@ type Writer struct {
 //      See bufio.NewWriter(io.Writer, int) (*bufio.NewWriter).
 func NewWriter(w io.Writer) *Writer {
     csvw := new(Writer)
-    csvw.Sep = DEFAULT_SEP
+    csvw.Sep = DefaultSep
     csvw.w = w
     csvw.bw = bufio.NewWriter(w)
     return csvw
@@ -52,7 +52,7 @@ func NewWriter(w io.Writer) *Writer {
 //      See bufio.NewWriterSize(io.Writer, int) (*bufio.NewWriter).
 func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
     csvw := new(Writer)
-    csvw.Sep = DEFAULT_SEP
+    csvw.Sep = DefaultSep
     csvw.w = w
     var bufErr os.Error
     csvw.bw, bufErr = bufio.NewWriterSize(w,n)

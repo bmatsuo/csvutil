@@ -1,6 +1,6 @@
 //  CSV data utilities for the Go programming language.
 //
-//  This is csvutil version 0.2_2
+//  This is csvutil version 0.2_3
 //
 package csvutil
 /* 
@@ -30,7 +30,7 @@ import (
 //  trimming is turned off for csvutil's I/O objects. But, when active,
 //  the default cutset is " \t", that is, (ASCII) whitespace.
 const (
-	DEFAULT_SEP  = ','
-	DEFAULT_TRIM = false
-	DEFAULT_CUTSET = " \t"
+	DefaultSep  = ','
+	DefaultTrim = false
+	DefaultCutset = " \t"
 )

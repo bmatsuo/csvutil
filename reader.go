@@ -27,6 +27,8 @@ import (
 	"os"
 )
 
+//  ReaderBufferMinimumSize is the smallest csvutil will allow the
+//  Reader's internal "long-line buffer" to be allocated as.
 const (
     ReaderBufferMinimumSize = 30
 )
@@ -211,7 +213,7 @@ func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
 //  Reset a Reader's configuration to the defaults. This is mostly meant
 //  for internal use but is safe for general use.
 func (csvr *Reader) Reset() *Reader {
-	return csvr.Configure(DEFAULT_SEP, DEFAULT_TRIM, DEFAULT_CUTSET)
+    return csvr.Configure(DefaultSep, DefaultTrim, DefaultCutset)
 }
 
 /* Comply with the reader interface. */
