@@ -67,7 +67,7 @@ func TestReadFile (T *testing.T) {
     }
     T.Logf("\nExpected;\n'%v'\n Received:\n'%v'\n\n", mat, inputMat)
     if len(inputMat) != len(mat) {
-        T.Error("INPUT MISMATCH; rows")
+        T.Fatal("INPUT MISMATCH; number of rows")
     }
     for i:=0 ; i<len(mat) ; i++ {
         if len(mat[i]) != len(inputMat[i]) {

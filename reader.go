@@ -20,6 +20,7 @@ type Reader struct {
     LastRow Row "The last row read by the Reader."
 	r io.Reader "Base reader object."
 	br *bufio.Reader "For reading lines."
+    bufSize int "Initial size of internal line buffers."
 }
 
 //  A simple row structure for rows read by a csvutil.Reader that
@@ -42,6 +43,7 @@ func NewReader(r io.Reader) *Reader {
 	var csvr *Reader = new(Reader).Reset()
 	csvr.r = r
 	csvr.br = bufio.NewReader(r)
+    csvr.bufSize = 80
 	return csvr
 }
 
@@ -52,20 +54,41 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 	var err os.Error
 	csvr.br, err = bufio.NewReaderSize(r, size)
 	if err != nil { panic(err) }
+    csvr.bufSize = size
 	return csvr
 }
 
 //  Read up to a new line and return a slice of string slices
 func (csvr *Reader) ReadRow() Row {
 	/* Read one row of the CSV and and return an array of the fields. */
+    var(
+        line, readLine, ln []byte
+        err os.Error
+        isPrefix bool
+    )
 	r := Row{Fields:nil, Error:nil}
     csvr.LastRow = r
-	line, isPrefix, err := csvr.br.ReadLine()
-	r.Fields = nil
-	r.Error = err
-	if isPrefix { panic("longline")  } // TODO fix this
-	if err == os.EOF { return r }
-	if err != nil { return r }
+    isPrefix = true
+    for isPrefix {
+        readLine, isPrefix, err = csvr.br.ReadLine()
+	    r.Fields = nil
+	    r.Error = err
+	    if err == os.EOF { return r }
+	    if err != nil { return r }
+	    if isPrefix {
+            readLen := len(readLine)
+            if line == nil {
+                line = make([]byte, 0, 2*readLen)
+            }
+            ln = make([]byte, readLen)
+            copy(ln, readLine)
+            line = append(line, ln...)
+        } else {
+            if line == nil {
+                line = readLine
+            }
+        }
+    }
 	var fields []string
 	fields = strings.FieldsFunc(
 			string(line),
