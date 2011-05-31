@@ -51,13 +51,6 @@ type Row struct {
 	Error os.Error "Error encountered reading"
 }
 
-func mkrow(fields []string, err os.Error) Row {
-	var r Row
-	r.Fields = fields
-	r.Error = err
-	return r
-}
-
 //  An object for iterating over the rows of a Reader.
 //      rit = reader.RowIterStarted()
 //      for r := range reader.RowsChan {
