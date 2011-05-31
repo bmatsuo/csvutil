@@ -10,7 +10,6 @@ import (
     "io"
     "utf8"
     "fmt"
-    "bytes"
     "strings"
 )
 
@@ -40,7 +39,9 @@ func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error) {
 //  the separator is done, so this file can be used to write multiple
 //  fields if desired. 
 func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
-    return csvw.Write(bytes.NewBufferString(str).Bytes())
+    var b []byte = make([]byte, len(str))
+    copy(b,str)
+    return csvw.Write(b)
 }
 
 //  Attempt to write a string to underlying io.Writer, but panic if a
