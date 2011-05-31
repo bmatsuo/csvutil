@@ -28,7 +28,7 @@ import (
 )
 
 const (
-    ReaderMinimumBufferSize = 30
+    ReaderBufferMinimumSize = 30
 )
 
 //  A reader object for CSV data utilizing the bufio package.
@@ -241,6 +241,9 @@ func (csvr *Reader) ReadRow() Row {
         pLen := len(csvr.p)
         if csvr.p == nil {
             pLen := 2*readLen
+            if pLen < ReaderBufferMinimumSize {
+                pLen = ReaderBufferMinimumSize
+            }
             csvr.p = make([]byte, pLen, pLen)
             csvr.pi = 0
         } else if csvr.pi + readLen > pLen {
