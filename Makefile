@@ -11,6 +11,7 @@ TARG=csvutil
 GOFILES=\
 	csv.go\
 	reader.go\
+	iterator.go\
 	writer.go\
 	file.go\
 

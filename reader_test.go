@@ -25,6 +25,7 @@ import (
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 func TestReadRow (T *testing.T) {
+    T.Log("Beginning test\n")
     var csvStr string = makeTestCSVString()
     var sreader *strings.Reader = strings.NewReader(csvStr)
     var csvr *Reader = NewReader(sreader)
@@ -65,5 +66,6 @@ func TestReadRow (T *testing.T) {
             assert_val(i,j)
         }
     }
+    T.Log("Finished test\n")
 }
 // END TEST1
