@@ -62,11 +62,12 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 func (csvr *Reader) ReadRow() Row {
 	/* Read one row of the CSV and and return an array of the fields. */
     var(
+        r Row
         line, readLine, ln []byte
         err os.Error
         isPrefix bool
     )
-	r := Row{Fields:nil, Error:nil}
+	r = Row{Fields:nil, Error:nil}
     csvr.LastRow = r
     isPrefix = true
     for isPrefix {
@@ -84,21 +85,20 @@ func (csvr *Reader) ReadRow() Row {
             copy(ln, readLine)
             line = append(line, ln...)
         } else {
+            // isPrefix is false here. The loop will break next iteration.
             if line == nil {
                 line = readLine
             }
         }
     }
-	var fields []string
-	fields = strings.FieldsFunc(
+	r.Fields = strings.FieldsFunc(
 			string(line),
 			func (c int) bool { return c == csvr.Sep } )
 	if csvr.Trim {
-		for i:=0 ; i<len(fields) ; i++ {
-			fields[i] = strings.Trim(fields[i], csvr.Cutset)
+		for i:=0 ; i<len(r.Fields) ; i++ {
+			r.Fields[i] = strings.Trim(r.Fields[i], csvr.Cutset)
 		}
 	}
-	r.Fields = fields
     csvr.LastRow = r
 	return r
 }
