@@ -16,12 +16,15 @@ func WriteFile(filename string, perm uint32,rows [][]string) (nbytes int, err os
         csvw *Writer
     )
     nbytes = 0
-    out, err = os.OpenFile(filename, os.O_WRONLY, perm)
+    out, err = os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, perm)
     if err != nil {
         return nbytes, err
     }
     csvw = NewWriter(out)
-    csvw.WriteRows(rows)
+    nbytes, err = csvw.WriteRows(rows)
+    if err != nil {
+        return nbytes, err
+    }
     err = out.Close()
     return nbytes, err
 }

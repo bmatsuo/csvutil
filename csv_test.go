@@ -35,4 +35,7 @@ func makeTestCSVString () string {
     rows[3] = ""
     return strings.Join(rows, "\n")
 }
+func makeTestCSVInstance () ([][]string, string) {
+    return makeTestCSVMatrix(), makeTestCSVString()
+}
 // END TEST1
