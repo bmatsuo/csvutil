@@ -30,12 +30,12 @@ ABOUT
 
     The csvutil package is written to make interacting with CSV data as
     easy as possible. Efficiency of its underlying functions and methods
-    are less important factors in its design. However, that being said,
-    it is important. And, csvutil should be capable of handling extremely
-    large streams of CSV data fairly well in terms of speed and memory
-    footprint. It should do this while not making your code bend over
-    backwards (more than necessary). As libraries should never make you
-    do.
+    are slightly less important factors in its design. However, that being
+    said, it is important. And, csvutil should be capable of handling
+    extremely large streams of CSV data fairly well in terms of speed and
+    memory footprint. It should do this while not making your code bend
+    over backwards (more than necessary). As libraries should never make
+    you do.
 
 FEATURES
 
