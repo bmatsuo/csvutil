@@ -35,14 +35,14 @@ FEATURES
     Slurping and spewing CSV data. That is, reading/writing whole
     files/data streams at once.
 
-    Iteration of individual rows of a CSV data stream for a smaller memory
-    footprint.
+    Iteration through individual rows of a CSV data stream for a smaller
+    memory footprint.
 
     Writing of individual writing fields/rows as well as batch writing.
 
 TODO
 
-    Cleaner iteration to handle partial iteration of rows.
+    Cleaner iteration to handle partial iteration of a stream.
 
     Iteration of individual fields from a CSV data stream with a flag that
     indicates new rows.
