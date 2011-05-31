@@ -42,7 +42,7 @@ FEATURES
 
 TODO
 
-    Cleaner iteration for handle partial iteration of rows.
+    Cleaner iteration to handle partial iteration of rows.
 
     Iteration of individual fields from a CSV data stream with a flag that
     indicates new rows.
