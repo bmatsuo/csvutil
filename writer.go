@@ -23,6 +23,7 @@ package csvutil
 import (
     "os"
     "io"
+    "bufio"
     "utf8"
     "strings"
 )
@@ -31,21 +32,38 @@ import (
 type Writer struct {
     Sep int "CSV Field seperator."
     w io.Writer "Base writer object."
+    bw *bufio.Writer "Base writer object."
 }
 
-//  Create a new CSV writer with the default field seperator
+//  Create a new CSV writer with the default field seperator and a
+//  buffer of some default size.
+//
+//      See bufio.NewWriter(io.Writer, int) (*bufio.NewWriter).
 func NewWriter(w io.Writer) *Writer {
     csvw := new(Writer)
     csvw.Sep = DEFAULT_SEP
     csvw.w = w
+    csvw.bw = bufio.NewWriter(w)
     return csvw
+}
+
+//  Create a new CSV writer using a buffer of at least n bytes.
+//
+//      See bufio.NewWriterSize(io.Writer, int) (*bufio.NewWriter).
+func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
+    csvw := new(Writer)
+    csvw.Sep = DEFAULT_SEP
+    csvw.w = w
+    var bufErr os.Error
+    csvw.bw, bufErr = bufio.NewWriterSize(w,n)
+    return csvw, bufErr
 }
 
 //  Write a slice of bytes to the data stream. No checking for containment
 //  of the separator is done, so this file can be used to write multiple
 //  fields if desired.
 func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error) {
-    nbytes, err = csvw.w.Write(p)
+    nbytes, err = csvw.bw.Write(p)
     return
 }
 
@@ -141,7 +159,26 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
     return success, err
 }
 
-// Write multple CSV rows at once.
+//  Like (*Writer) WriteFieldsln ([]string). But, writing is followed by
+//  a flushing of any buffered output. The number of bytes writen to the
+//  underlying io.Writer is returned along with any error encountered
+//  while writing (or during the flush that follows an error-free write)
+//  is returned.
+func (csvw *Writer) WriteRow(fields []string) (int, os.Error) {
+    nbytes, err := csvw.WriteFieldsln(fields)
+    if err == nil {
+        return nbytes, err
+    }
+    return nbytes, csvw.Flush()
+}
+
+//  Flush any buffered data to the underlying io.Writer.
+func (csvw *Writer) Flush() os.Error {
+    return csvw.bw.Flush()
+}
+
+//  Write multple CSV rows at once. The output buffer is flushed after
+//  the last Write operation.
 func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
     var success, nbytes int
     var err os.Error
@@ -153,5 +190,5 @@ func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
             return success, err
         }
     }
-    return success, err
+    return success, csvw.Flush()
 }

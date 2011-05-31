@@ -40,6 +40,10 @@ func TestWriteRow (T *testing.T) {
         }
         length += nbytes
     }
+    flushErr := csvw.Flush()
+    if flushErr != nil {
+        T.Errorf("Error flushing output; %v\n", flushErr)
+    }
     var output string = string(bwriter.Bytes())
     if len(output) == 0 {
         T.Error("Read 0 bytes\n")
