@@ -62,8 +62,8 @@ DOCUMENTATION
         godoc github.com/bmatsuo/csvutil
 
     This presents a lot of information. You can instead use one of the
-    following commands to get information about the more specific parts
-    and useful parts of csvutil
+    following commands to get information about the more specific and
+    useful parts of csvutil
 
         godoc github.com/bmatsuo/csvutil Reader
         godoc github.com/bmatsuo/csvutil ReadFile
