@@ -33,14 +33,9 @@ func (csvw *Writer) WriteFields(fields []string) (int, os.Error) {
     var success int = 0
     var err os.Error
     for i:=0 ; i<n ; i++ {
-        nbytes, err := fmt.Fprint(csvw.w,fields[i])
+        nbytes, err := fmt.Fprintf(csvw.w,"%s%c",fields[i], csvw.Sep)
         success += nbytes
-        if nbytes < len(fields[i]) {
-            return success, err
-        }
-        nbytes, err = fmt.Fprintf(csvw.w, "%c",csvw.Sep)
-        success += nbytes
-        if nbytes < utf8.RuneLen(csvw.Sep) {
+        if nbytes < len(fields[i]) + utf8.RuneLen(csvw.Sep) {
             return success, err
         }
     }
