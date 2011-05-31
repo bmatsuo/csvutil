@@ -9,14 +9,17 @@ SYNOPSIS
     The csvutil package can be used to read CSV data from a io.Reader.
 
         import "github.com/bmatsuo/csvutil"
-        reader := csvutil.NewReader(os.Stdin)
-        reader.Trim = true
-        writer := csvutil.NewWriter(os.Stdout)
-        for r := range reader.EachRow() {
-            if r.Error != nil {
-                panic(r.Error)
+
+        func main() {
+            reader := csvutil.NewReader(os.Stdin)
+            reader.Trim = true
+            writer := csvutil.NewWriter(os.Stdout)
+            for r := range reader.EachRow() {
+                if r.Error != nil {
+                    panic(r.Error)
+                }
+                write.WriteFieldsln(r)
             }
-            write.WriteFieldsln(r)
         }
 
 INSTALL
