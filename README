@@ -22,6 +22,33 @@ SYNOPSIS
             }
         }
 
+ABOUT
+
+    The csvutil package is written to make interacting with CSV data as
+    easy as possible. Efficiency of its underlying functions and methods
+    are less important factors in its design. However, that being said,
+    csvutil should be capable of handling very large streams of CSV data
+    fairly well in terms of speed and memory usage.
+
+FEATURES
+
+    Slurping and spewing CSV data. That is, reading/writing whole
+    files/data streams at once.
+
+    Iteration of individual rows of a CSV data stream for a smaller memory
+    footprint.
+
+    Writing of individual writing fields/rows as well as batch writing.
+
+TODO
+
+    Cleaner iteration for handle partial iteration of rows.
+
+    Iteration of individual fields from a CSV data stream with a flag that
+    indicates new rows.
+
+    Formatted reading/writing of CSV data.
+
 INSTALL
 
     The easiest installation of csvutil is done through goinstall.
