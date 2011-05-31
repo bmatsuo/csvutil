@@ -54,27 +54,31 @@ func mkrow(fields []string, err os.Error) Row {
 }
 
 //  An object for iterating over the rows of a Reader.
-//      rit = reader.RowIterAuto()
+//      rit = reader.RowIterStarted()
 //      for r := range reader.RowsChan {
 //          if r.Error != nil {
+//              rit.Break()
 //              panic(r.Error)
 //          }
 //          var fields []string = r.Fields
+//          if !fieldsOk(fields) {
+//              rit.Break()
+//              break
+//          }
 //          // Process the desired entries of "fields".
 //          rit.Next()
 //      }
-//  The (*Reader) RowIterAuto() (*RowReaderIterator) method creates a
-//  new iterator object and immediately reads a row from the Reader.
-//  If this behavior is not desired, use the underlying alternate method
-//  (*Reader) RowIter() (*RowReaderIterator).
+//  This itererator is safe to break out of. For iterators meant for
+//  parsing an entire stream, see the ReaderRowIteratorAuto type.
 type ReaderRowIterator struct {
     stopped bool
     RowsChan <-chan Row
     control chan<- bool
 }
 
-//  A ReaderRowIterator meant for reading until the end of the
-//  data stream of the corresponding Reader's io.Reader. 
+//  A ReaderRowIteratorAuto is meant for reading until encountering the
+//  end of the data stream corresponding to a Reader's underlying
+//  io.Reader. 
 //      rit = reader.RowIterAuto()
 //      for r := range reader.RowsChan {
 //          if r.Error != nil {
