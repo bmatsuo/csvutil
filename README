@@ -8,6 +8,7 @@ SYNOPSIS
 
     The csvutil package can be used to read CSV data from any io.Reader.
 
+        package main
         import "github.com/bmatsuo/csvutil"
 
         func main() {
