@@ -27,6 +27,10 @@ import (
 	"os"
 )
 
+const (
+    ReaderMinimumBufferSize = 30
+)
+
 //  A reader object for CSV data utilizing the bufio package.
 type Reader struct {
 	Sep int "Field separator character."
@@ -35,7 +39,8 @@ type Reader struct {
     LastRow Row "The last row read by the Reader."
 	r io.Reader "Base reader object."
 	br *bufio.Reader "For reading lines."
-    bufSize int "Initial size of internal line buffers."
+    p []byte "A buffer for longer lines"
+    pi int "An index into the p buffer."
 }
 
 //  A simple row structure for rows read by a csvutil.Reader that
@@ -123,7 +128,6 @@ func NewReader(r io.Reader) *Reader {
 	var csvr *Reader = new(Reader).Reset()
 	csvr.r = r
 	csvr.br = bufio.NewReader(r)
-    csvr.bufSize = 80
 	return csvr
 }
 
@@ -134,7 +138,6 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 	var err os.Error
 	csvr.br, err = bufio.NewReaderSize(r, size)
 	if err != nil { panic(err) }
-    csvr.bufSize = size
 	return csvr
 }
 
@@ -219,9 +222,11 @@ func (csvr *Reader) ReadRow() Row {
 	/* Read one row of the CSV and and return an array of the fields. */
     var(
         r Row
-        line, readLine, ln []byte
+        line, readLine []byte
         err os.Error
         isPrefix bool
+        i int
+        b byte
     )
 	r = Row{Fields:nil, Error:nil}
     csvr.LastRow = r
@@ -232,24 +237,38 @@ func (csvr *Reader) ReadRow() Row {
 	    r.Error = err
 	    if err == os.EOF { return r }
 	    if err != nil { return r }
+        readLen := len(readLine)
+        pLen := len(csvr.p)
+        if csvr.p == nil {
+            pLen := 2*readLen
+            csvr.p = make([]byte, pLen, pLen)
+            csvr.pi = 0
+        } else if csvr.pi + readLen > pLen {
+            newLen := 2*pLen
+            csvr.p = make([]byte, newLen,newLen)
+            csvr.pi = 0
+        }
 	    if isPrefix {
-            readLen := len(readLine)
-            if line == nil {
-                line = make([]byte, 0, 2*readLen)
+            for i,b = range readLine {
+                csvr.p[csvr.pi + i] = b
             }
-            ln = make([]byte, readLen)
-            copy(ln, readLine)
-            line = append(line, ln...)
+            csvr.pi += i + 1
         } else {
             // isPrefix is false here. The loop will break next iteration.
-            if line == nil {
-                line = readLine
+            for i,b = range readLine {
+                csvr.p[csvr.pi + i] = b
             }
+            csvr.pi += i + 1
         }
     }
+    line = csvr.p[:csvr.pi]
 	r.Fields = strings.FieldsFunc(
 			string(line),
 			func (c int) bool { return c == csvr.Sep } )
+    for i := 0 ; i < csvr.pi ; i++ {
+        csvr.p[i] = 0
+    }
+    csvr.pi = 0
 	if csvr.Trim {
 		for i:=0 ; i<len(r.Fields) ; i++ {
 			r.Fields[i] = strings.Trim(r.Fields[i], csvr.Cutset)
