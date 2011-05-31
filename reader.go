@@ -38,6 +38,33 @@ func mkrow(fields []string, err os.Error) Row {
 	return r
 }
 
+//  An object for iterating over the rows of a Reader.
+type ReaderRowIterator struct {
+    stopped bool
+    RowsChan <-chan Row
+    control chan<- bool
+}
+
+//  Tell the iterator to get another row from the Reader.
+func (csvri *ReaderRowIterator) Next() {
+    if csvri.stopped {
+        panic("stopped")
+    }
+    csvri.control <- true
+}
+
+//  Tell the iterator to stop fetching rows and exit its goroutine.
+//  Calling the (*ReaderRowIterator) Break() method is not necessary,
+//  but to avoid doing so will cause the iterating goroutine to sleep
+//  for the duration of the program.
+func (csvri *ReaderRowIterator) Break() {
+    if csvri.stopped {
+        return
+    }
+    close(csvri.control)
+    csvri.stopped = true
+}
+
 //  Create a new reader object.
 func NewReader(r io.Reader) *Reader {
 	var csvr *Reader = new(Reader).Reset()
@@ -56,6 +83,50 @@ func NewReaderSize(r io.Reader, size int) *Reader {
 	if err != nil { panic(err) }
     csvr.bufSize = size
 	return csvr
+}
+
+// Create a new row iterator and return it.
+func (csvr *Reader) RowIter() (*ReaderRowIterator) {
+    ri := new(ReaderRowIterator)
+    throughChan := make(chan Row)
+    controlChan := make (chan bool)
+    ri.RowsChan = throughChan
+    ri.control = controlChan
+	var read_rows = func (r chan<- Row, c <-chan bool) {
+        defer func() {
+            if x:=recover(); x!=nil {
+                /* Do nothing. */
+            }
+        } ()
+		for true {
+            cont, ok := <-c
+            if !ok || !cont {
+                break
+            }
+            csvr.LastRow = Row{Fields:nil, Error:nil}
+			var row Row = csvr.ReadRow()
+			if row.Fields == nil {
+				if row.Error == os.EOF {
+					break
+				} else {
+					panic(row.Error)
+				}
+			}
+            csvr.LastRow = row
+			r <- row
+		}
+		close(r)
+	}
+	go read_rows(throughChan, controlChan)
+	return ri
+}
+
+//  For convenience, return a new ReaderRowIterator rit that has
+//  already already been the target of (*ReaderRowIterator) Next().
+func (csvr *Reader) RowIterStarted() (rit *ReaderRowIterator) {
+    rit = csvr.RowIter()
+    rit.Next()
+    return rit
 }
 
 //  Read up to a new line and return a slice of string slices

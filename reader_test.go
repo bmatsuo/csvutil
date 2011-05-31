@@ -22,7 +22,8 @@ func TestReadRow (T *testing.T) {
     rows = make([][]string, n) // Expect a square matrix.
     rows[0] = headrow.Fields
     var i int = 1
-    for row := range csvr.EachRow() {
+    rit := csvr.RowIterStarted()
+    for row := range rit.RowsChan {
         var k int = len(row.Fields)
         if k != n {
             T.Errorf("Unexpected row size %d (!= %d)\n", k, n)
@@ -36,6 +37,7 @@ func TestReadRow (T *testing.T) {
         }
         rows[i] = row.Fields
         i++
+        rit.Next()
     }
     var test_matrix [][]string = makeTestCSVMatrix()
     var assert_val = func (i,j int) {
