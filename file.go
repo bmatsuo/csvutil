@@ -8,8 +8,10 @@ import (
     "os"
 )
 
-//  Write CSV data to a named file. Requires file permissions be specified.
-//  Recommended permissions are 0600, 0622, and 0666 (6:rw, 4:w, 2:r).
+//  Write CSV data to a named file. If the file does not exist, it is
+//  created. If the file exists, it is truncated upon opening. Requires
+//  that file permissions be specified. Recommended permissions are 0600,
+//  0622, and 0666 (6:rw, 4:w, 2:r). 
 func WriteFile(filename string, perm uint32,rows [][]string) (nbytes int, err os.Error) {
     var (
         out *os.File
