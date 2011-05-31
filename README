@@ -53,3 +53,19 @@ INSTALL
     The easiest installation of csvutil is done through goinstall.
 
         goinstall github.com/bmatsuo/csvutil
+
+DOCUMENTATION
+
+    The best way to read the current csvutil documentation is through
+    godoc.
+
+        godoc github.com/bmatsuo/csvutil
+
+    This presents a lot of information. You can instead use one of the
+    following commands to get information about the more specific parts
+    and useful parts of csvutil
+
+        godoc github.com/bmatsuo/csvutil Reader
+        godoc github.com/bmatsuo/csvutil ReadFile
+        godoc github.com/bmatsuo/csvutil Write
+        godoc github.com/bmatsuo/csvutil WriteFile
