@@ -1,6 +1,6 @@
 //  CSV data utilities for the Go programming language.
 //
-//  This is csvutil version 0.1_4
+//  This is csvutil version 0.1_6
 //
 package csvutil
 /* 

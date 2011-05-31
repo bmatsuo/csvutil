@@ -2,7 +2,7 @@
 
 VERSION
 
-    This is csutil version 0.1_4
+    This is csutil version 0.1_6
 
 SYNOPSIS
 
@@ -31,8 +31,9 @@ ABOUT
     The csvutil package is written to make interacting with CSV data as
     easy as possible. Efficiency of its underlying functions and methods
     are less important factors in its design. However, that being said,
-    csvutil should be capable of handling very large streams of CSV data
-    fairly well in terms of speed and memory usage.
+    it is important. And, csvutil should be capable of handling extremely
+    large streams of CSV data fairly well in terms of speed and memory
+    footprint.
 
 FEATURES
 
@@ -48,6 +49,8 @@ TODO
 
     Iteration of individual fields from a CSV data stream with a flag that
     indicates new rows.
+
+    Make fewer blocking I/O calls by utilizing internal buffers..
 
     Formatted reading/writing of CSV data.
 
