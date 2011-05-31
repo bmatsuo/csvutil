@@ -146,11 +146,13 @@ func (csvr *Reader) RowIter() (*ReaderRowIterator) {
     ri.RowsChan = throughChan
     ri.control = controlChan
 	var read_rows = func (r chan<- Row, c <-chan bool) {
-        defer func() {
-            if x:=recover(); x!=nil {
-                /* Do nothing. */
-            }
-        } ()
+        /* Deferring may be unnecessary (and undesired) now.
+            defer func() {
+                x:=recover()
+                if x !=nil {
+                }
+            } ()
+        */
 		for true {
             cont, ok := <-c
             if !ok || !cont {
