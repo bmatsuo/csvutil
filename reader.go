@@ -319,36 +319,6 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
     return rbuf, err
 }
 
-/*
-func (csvr *Reader) EachRow() <-chan Row {
-	// Generator function for iterating through rows.
-    c := make(chan Row)
-	var read_rows = func (c chan<- Row) {
-        defer func() {
-            if x:=recover(); x!=nil {
-                // Do nothing.
-            }
-        } ()
-		for true {
-            csvr.LastRow = Row{Fields:nil, Error:nil}
-			var r Row = csvr.ReadRow()
-			if r.Fields == nil {
-				if r.Error == os.EOF {
-					break
-				} else {
-					panic(r.Error)
-				}
-			}
-            csvr.LastRow = r
-			c <- r
-		}
-		close(c)
-	}
-	go read_rows(c)
-	return c
-}
-*/
-
 //  A function routine for setting all the configuration variables of a
 //  csvutil.Reader in a single line.
 func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
