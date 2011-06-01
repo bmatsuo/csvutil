@@ -10,6 +10,7 @@ include $(GOROOT)/src/Make.inc
 TARG=csvutil
 GOFILES=\
 	csv.go\
+	row.go\
 	reader.go\
 	iterator.go\
 	writer.go\

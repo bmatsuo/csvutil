@@ -45,14 +45,6 @@ type Reader struct {
     pi int "An index into the p buffer."
 }
 
-//  A simple row structure for rows read by a csvutil.Reader that
-//  encapsulates any read error enountered along with any data read
-//  prior to encountering an error.
-type Row struct {
-	Fields []string "CSV row field data"
-	Error os.Error "Error encountered reading"
-}
-
 //  Create a new reader object.
 func NewReader(r io.Reader) *Reader {
 	var csvr *Reader = new(Reader).Reset()

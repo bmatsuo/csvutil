@@ -102,12 +102,14 @@ func (csvr *Reader) RowIter() (*ReaderRowIterator) {
             }
             csvr.LastRow = Row{Fields:nil, Error:nil}
 			var row Row = csvr.ReadRow()
+			if row.HasEOF() {
+				break
+            }
 			if row.Fields == nil {
-				if row.Error == os.EOF {
-					break
-				} else {
-					panic(row.Error)
-				}
+                if row.HasError() {
+				    panic(row.Error)
+                }
+                panic("nilfields")
 			}
             csvr.LastRow = row
 			r <- row
@@ -140,12 +142,14 @@ func (csvr *Reader) RowIterAuto() (*ReaderRowIteratorAuto) {
 		for true {
             csvr.LastRow = Row{Fields:nil, Error:nil}
 			var row Row = csvr.ReadRow()
+			if row.HasEOF() {
+				break
+            }
 			if row.Fields == nil {
-				if row.Error == os.EOF {
-					break
-				} else {
-					panic(row.Error)
-				}
+                if row.HasError() {
+				    panic(row.Error)
+                }
+                panic("nilfields")
 			}
             csvr.LastRow = row
 			r <- row
