@@ -17,9 +17,8 @@ SYNOPSIS
             writer := csvutil.NewWriter(os.Stdout)
             rit := reader.RowIterStarted()
             for r := range rit.Rows {
-                if r.Error != nil {
-                    rit.Break()
-                    panic(r.Error)
+                if r.HasError() {
+                    rit.Croak(r.Error)
                 }
                 write.WriteFieldsln(r)
                 rit.Next()
