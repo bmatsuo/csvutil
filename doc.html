@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Documentation: csvutil</title>
+<link rel="stylesheet" href="../static/base.css" type="text/css"/> 
+</head>
+<body>
+<div id="content"> 
+<h1>Documentation: csvutil</h1>
+
+<h4>Table Of Contents</h4>
+<ul>
+<li><a href="#package">Package</a>
+<li><a href="#constants">Constants</a>
+<li><a href="#ReadFile">func ReadFile</a>
+<li><a href="#WriteFile">func WriteFile</a>
+<li><a href="#Reader">type Reader</a>
+        <ul>
+    <li><a href="#NewReader">func NewReader</a>
+    <li><a href="#NewReaderSize">func NewReaderSize</a>
+    <li><a href="#Reader.Configure">func (*Reader) Configure</a>
+    <li><a href="#Reader.ReadNRows">func (*Reader) ReadNRows</a>
+    <li><a href="#Reader.ReadRow">func (*Reader) ReadRow</a>
+    <li><a href="#Reader.ReadRows">func (*Reader) ReadRows</a>
+    <li><a href="#Reader.RemainingRows">func (*Reader) RemainingRows</a>
+    <li><a href="#Reader.RemainingRowsSize">func (*Reader) RemainingRowsSize</a>
+    <li><a href="#Reader.Reset">func (*Reader) Reset</a>
+    <li><a href="#Reader.RowIter">func (*Reader) RowIter</a>
+    <li><a href="#Reader.RowIterAuto">func (*Reader) RowIterAuto</a>
+    <li><a href="#Reader.RowIterStarted">func (*Reader) RowIterStarted</a>
+        </ul>
+<li><a href="#ReaderRowIterator">type ReaderRowIterator</a>
+            <ul>
+    <li><a href="#ReaderRowIterator.Break">func (*ReaderRowIterator) Break</a>
+    <li><a href="#ReaderRowIterator.Croak">func (*ReaderRowIterator) Croak</a>
+    <li><a href="#ReaderRowIterator.Next">func (*ReaderRowIterator) Next</a>
+            </ul>
+<li><a href="#ReaderRowIteratorAuto">type ReaderRowIteratorAuto</a>
+<li><a href="#Row">type Row</a>
+            <ul>
+    <li><a href="#Row.HasEOF">func (Row) HasEOF</a>
+    <li><a href="#Row.HasError">func (Row) HasError</a>
+            </ul>
+<li><a href="#Writer">type Writer</a>
+        <ul>
+    <li><a href="#NewWriter">func NewWriter</a>
+    <li><a href="#NewWriterSize">func NewWriterSize</a>
+    <li><a href="#Writer.Flush">func (*Writer) Flush</a>
+    <li><a href="#Writer.Write">func (*Writer) Write</a>
+    <li><a href="#Writer.WriteField">func (*Writer) WriteField</a>
+    <li><a href="#Writer.WriteFields">func (*Writer) WriteFields</a>
+    <li><a href="#Writer.WriteFieldsln">func (*Writer) WriteFieldsln</a>
+    <li><a href="#Writer.WriteRow">func (*Writer) WriteRow</a>
+    <li><a href="#Writer.WriteRows">func (*Writer) WriteRows</a>
+    <li><a href="#Writer.WriteString">func (*Writer) WriteString</a>
+    <li><a href="#Writer.WriteStringSafe">func (*Writer) WriteStringSafe</a>
+        </ul>
+</ul>
+
+<h2 id="package">Package</h2>
+
+<p><code>import "github.com/bmatsuo/csvutil"</code></p>
+
+<p>
+CSV data utilities for the Go programming language.
+</p>
+<p>
+This is csvutil version 0.2_42
+</p>
+
+
+<h2 id="constants">Constants</h2>
+<p>
+The default CSV field separator is a comma &#39;,&#39;. By default, field
+trimming is turned off for csvutil&#39;s I/O objects. But, when active,
+the default cutset is &#34; \t&#34;, that is, (ASCII) whitespace.
+</p>
+
+<pre>
+const (
+ DefaultSep    = &#39;,&#39;
+ DefaultTrim   = false
+ DefaultCutset = &#34; \t&#34;
+)
+</pre>
+<p>
+ReaderBufferMinimumSize is the smallest csvutil will allow the
+Reader&#39;s internal &#34;long-line buffer&#34; to be allocated as.
+</p>
+
+<pre>
+const (
+ ReaderBufferMinimumSize = 30
+)
+</pre>
+
+
+<h2 id="ReadFile"><a href="file.go#L50">func ReadFile</a></h2>
+<p><code>func ReadFile(filename string) (rows [][]string, err os.Error)</code></p>
+<p>
+Read a named CSV file into a new slice of new string slices.
+</p>
+
+<h2 id="WriteFile"><a href="file.go#L30">func WriteFile</a></h2>
+<p><code>func WriteFile(filename string, perm uint32, rows [][]string) (nbytes int, err os.Error)</code></p>
+<p>
+Write CSV data to a named file. If the file does not exist, it is
+created. If the file exists, it is truncated upon opening. Requires
+that file permissions be specified. Recommended permissions are 0600,
+0622, and 0666 (6:rw, 4:w, 2:r).
+</p>
+
+
+<h2 id="Reader">type Reader</h2>
+<p>
+A reader object for CSV data utilizing the bufio package.
+</p>
+
+<pre>type Reader struct {
+ Sep     int    &#34;Field separator character.&#34;
+ Trim    bool   &#34;Remove excess whitespace from field values.&#34;
+ Cutset  string &#34;Set of characters to trim.&#34;
+ LastRow Row    &#34;The last row read by the Reader.&#34;
+ // contains unexported fields
+}</pre>
+
+
+
+    <h3 id="NewReader"><a href="reader.go#L49">func NewReader</a></h3>
+    <p><code>func NewReader(r io.Reader) *Reader</code></p>
+    <p>
+Create a new reader object.
+</p>
+
+    <h3 id="NewReaderSize"><a href="reader.go#L57">func NewReaderSize</a></h3>
+    <p><code>func NewReaderSize(r io.Reader, size int) *Reader</code></p>
+    <p>
+Create a new reader with a buffer of a specified size.
+</p>
+
+
+    <h3 id="Reader.Configure"><a href="reader.go#L204">func (*Reader) Configure</a></h3>
+    <p><code>func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader</code></p>
+    <p>
+A function routine for setting all the configuration variables of a
+csvutil.Reader in a single line.
+</p>
+
+    <h3 id="Reader.ReadNRows"><a href="reader.go#L164">func (*Reader) ReadNRows</a></h3>
+    <p><code>func (csvr *Reader) ReadNRows(n int) (int, os.Error)</code></p>
+    <p>
+Convenience methor to read at most n rows from csvr. Simple allocates
+a row slice rs and calls csvr.ReadRows(rs). Returns the actual number
+of rows read and any error that occurred (and halted reading).
+</p>
+
+    <h3 id="Reader.ReadRow"><a href="reader.go#L69">func (*Reader) ReadRow</a></h3>
+    <p><code>func (csvr *Reader) ReadRow() Row</code></p>
+    <p>
+Read up to a new line and return a slice of string slices
+</p>
+
+    <h3 id="Reader.ReadRows"><a href="reader.go#L140">func (*Reader) ReadRows</a></h3>
+    <p><code>func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error)</code></p>
+    <p>
+Read rows into a preallocated buffer. Any error encountered is
+returned. Returns the number of rows read in a single value return
+context any errors encountered (including os.EOF).
+</p>
+
+    <h3 id="Reader.RemainingRows"><a href="reader.go#L172">func (*Reader) RemainingRows</a></h3>
+    <p><code>func (csvr *Reader) RemainingRows() (rows [][]string, err os.Error)</code></p>
+    <p>
+Reads any remaining rows of CSV data in the underlying io.Reader.
+Uses resizing when a preallocated buffer of rows fills. Up to 16
+rows can be read without any doubling occuring.
+</p>
+
+    <h3 id="Reader.RemainingRowsSize"><a href="reader.go#L178">func (*Reader) RemainingRowsSize</a></h3>
+    <p><code>func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error)</code></p>
+    <p>
+Like csvr.RemainingRows(), but allows specification of the initial
+row buffer capacity.
+</p>
+
+    <h3 id="Reader.Reset"><a href="reader.go#L213">func (*Reader) Reset</a></h3>
+    <p><code>func (csvr *Reader) Reset() *Reader</code></p>
+    <p>
+Reset a Reader&#39;s configuration to the defaults. This is mostly meant
+for internal use but is safe for general use.
+</p>
+
+    <h3 id="Reader.RowIter"><a href="iterator.go#L84">func (*Reader) RowIter</a></h3>
+    <p><code>func (csvr *Reader) RowIter() *ReaderRowIterator</code></p>
+    <p>
+Create a new row iterator and return it.
+</p>
+
+    <h3 id="Reader.RowIterAuto"><a href="iterator.go#L132">func (*Reader) RowIterAuto</a></h3>
+    <p><code>func (csvr *Reader) RowIterAuto() *ReaderRowIteratorAuto</code></p>
+    <p>
+Create a new ReaderRowIteratorAuto object and return it.
+</p>
+
+    <h3 id="Reader.RowIterStarted"><a href="iterator.go#L125">func (*Reader) RowIterStarted</a></h3>
+    <p><code>func (csvr *Reader) RowIterStarted() (rit *ReaderRowIterator)</code></p>
+    <p>
+For convenience, return a new ReaderRowIterator rit that has
+already already been the target of (*ReaderRowIterator) Next().
+</p>
+
+
+<h2 id="ReaderRowIterator">type ReaderRowIterator</h2>
+<p>
+An object for iterating over the rows of a Reader.
+</p>
+<pre>rit = reader.RowIterStarted()
+for r := range reader.RowsChan {
+    if r.Error != nil {
+        rit.Break()
+        panic(r.Error)
+    }
+    var fields []string = r.Fields
+    if !fieldsOk(fields) {
+        rit.Break()
+        break
+    }
+    // Process the desired entries of &#34;fields&#34;.
+    rit.Next()
+}
+</pre>
+<p>
+This itererator is safe to break out of. For iterators meant for
+parsing an entire stream, see the ReaderRowIteratorAuto type.
+</p>
+
+<pre>type ReaderRowIterator struct {
+ RowsChan &lt;-chan Row
+ // contains unexported fields
+}</pre>
+
+
+
+
+    <h3 id="ReaderRowIterator.Break"><a href="iterator.go#L68">func (*ReaderRowIterator) Break</a></h3>
+    <p><code>func (csvri *ReaderRowIterator) Break()</code></p>
+    <p>
+Tell the iterator to stop fetching rows and exit its goroutine.
+Calling the (*ReaderRowIterator) Break() method is not necessary,
+but to avoid doing so will cause the iterating goroutine to sleep
+for the duration of the program.
+</p>
+
+    <h3 id="ReaderRowIterator.Croak"><a href="iterator.go#L78">func (*ReaderRowIterator) Croak</a></h3>
+    <p><code>func (csvri *ReaderRowIterator) Croak(err os.Error)</code></p>
+    <p>
+Like (*ReaderRowIterator) Break(), but also panics afterward. This
+helps if its possible that the panic could be recovered.
+</p>
+
+    <h3 id="ReaderRowIterator.Next"><a href="iterator.go#L57">func (*ReaderRowIterator) Next</a></h3>
+    <p><code>func (csvri *ReaderRowIterator) Next()</code></p>
+    <p>
+Tell the iterator to get another row from the Reader.
+</p>
+
+
+<h2 id="ReaderRowIteratorAuto">type ReaderRowIteratorAuto</h2>
+<p>
+A ReaderRowIteratorAuto is meant for reading until encountering the
+end of the data stream corresponding to a Reader&#39;s underlying
+io.Reader.
+</p>
+<pre>rit = reader.RowIterAuto()
+for r := range reader.RowsChan {
+    if r.Error != nil {
+        panic(r.Error)
+    }
+    var fields []string = r.Fields
+    // Process the desired entries of &#34;fields&#34;.
+}
+</pre>
+<p>
+This iteration using a range statement as above, it is not safe to
+break out of the loop. This generally causes the &#39;loss&#39; of at least
+one row.
+</p>
+<p>
+For iterating rows in a way such that the iteration can be stopped
+safely, use ReaderRowIterator objects instead.
+</p>
+
+<pre>type ReaderRowIteratorAuto struct {
+ RowsChan &lt;-chan Row
+ // contains unexported fields
+}</pre>
+
+
+
+
+
+<h2 id="Row">type Row</h2>
+<p>
+A simple row structure for rows read by a csvutil.Reader that
+encapsulates any read error enountered along with any data read
+prior to encountering an error.
+</p>
+
+<pre>type Row struct {
+ Fields []string &#34;CSV row field data&#34;
+ Error  os.Error &#34;Error encountered reading&#34;
+}</pre>
+
+
+
+
+    <h3 id="Row.HasEOF"><a href="row.go#L21">func (Row) HasEOF</a></h3>
+    <p><code>func (r Row) HasEOF() bool</code></p>
+    <p>
+A wrapper for the test r.Error == os.EOF
+</p>
+
+    <h3 id="Row.HasError"><a href="row.go#L26">func (Row) HasError</a></h3>
+    <p><code>func (r Row) HasError() bool</code></p>
+    <p>
+A wrapper for the test r.Error != nil
+</p>
+
+
+<h2 id="Writer">type Writer</h2>
+<p>
+A simple CSV file writer.
+</p>
+
+<pre>type Writer struct {
+ Sep int &#34;CSV Field seperator.&#34;
+ // contains unexported fields
+}</pre>
+
+
+
+    <h3 id="NewWriter"><a href="writer.go#L42">func NewWriter</a></h3>
+    <p><code>func NewWriter(w io.Writer) *Writer</code></p>
+    <p>
+Create a new CSV writer with the default field seperator and a
+buffer of some default size.
+</p>
+<pre>See bufio.NewWriter(io.Writer, int) (*bufio.NewWriter).
+</pre>
+
+    <h3 id="NewWriterSize"><a href="writer.go#L53">func NewWriterSize</a></h3>
+    <p><code>func NewWriterSize(w io.Writer, n int) (*Writer, os.Error)</code></p>
+    <p>
+Create a new CSV writer using a buffer of at least n bytes.
+</p>
+<pre>See bufio.NewWriterSize(io.Writer, int) (*bufio.NewWriter).
+</pre>
+
+
+    <h3 id="Writer.Flush"><a href="writer.go#L176">func (*Writer) Flush</a></h3>
+    <p><code>func (csvw *Writer) Flush() os.Error</code></p>
+    <p>
+Flush any buffered data to the underlying io.Writer.
+</p>
+
+    <h3 id="Writer.Write"><a href="writer.go#L65">func (*Writer) Write</a></h3>
+    <p><code>func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error)</code></p>
+    <p>
+Write a slice of bytes to the data stream. No checking for containment
+of the separator is done, so this file can be used to write multiple
+fields if desired.
+</p>
+
+    <h3 id="Writer.WriteField"><a href="writer.go#L102">func (*Writer) WriteField</a></h3>
+    <p><code>func (csvw *Writer) WriteField(field string, ln bool) (nbytes int, err os.Error)</code></p>
+    <p>
+Write a single field of CSV data. If the ln argument is true, a
+trailing new line is printed after the field. Otherwise, when
+the ln argument is false, a separator character is printed after
+the field.
+</p>
+
+    <h3 id="Writer.WriteFields"><a href="writer.go#L125">func (*Writer) WriteFields</a></h3>
+    <p><code>func (csvw *Writer) WriteFields(fields []string) (int, os.Error)</code></p>
+    <p>
+Write a slice of field values with a trailing field seperator and no &#39;\n&#39;.
+Returns any error incurred from writing.
+</p>
+
+    <h3 id="Writer.WriteFieldsln"><a href="writer.go#L141">func (*Writer) WriteFieldsln</a></h3>
+    <p><code>func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error)</code></p>
+    <p>
+Write a slice of field values with a trailing new line &#39;\n&#39;.
+Returns any error incurred from writing.
+</p>
+
+    <h3 id="Writer.WriteRow"><a href="writer.go#L167">func (*Writer) WriteRow</a></h3>
+    <p><code>func (csvw *Writer) WriteRow(fields []string) (int, os.Error)</code></p>
+    <p>
+Like (*Writer) WriteFieldsln ([]string). But, writing is followed by
+a flushing of any buffered output. The number of bytes writen to the
+underlying io.Writer is returned along with any error encountered
+while writing (or during the flush that follows an error-free write)
+is returned.
+</p>
+
+    <h3 id="Writer.WriteRows"><a href="writer.go#L182">func (*Writer) WriteRows</a></h3>
+    <p><code>func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error)</code></p>
+    <p>
+Write multple CSV rows at once. The output buffer is flushed after
+the last Write operation.
+</p>
+
+    <h3 id="Writer.WriteString"><a href="writer.go#L73">func (*Writer) WriteString</a></h3>
+    <p><code>func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error)</code></p>
+    <p>
+Write a string to the data stream. No checking for containment of
+the separator is done, so this file can be used to write multiple
+fields if desired.
+</p>
+
+    <h3 id="Writer.WriteStringSafe"><a href="writer.go#L81">func (*Writer) WriteStringSafe</a></h3>
+    <p><code>func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error)</code></p>
+    <p>
+Attempt to write a string to underlying io.Writer, but panic if a
+separator character found in the stream.
+</p>
+
+
+</div>
+</body>
+</html>
