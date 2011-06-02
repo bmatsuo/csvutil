@@ -20,7 +20,7 @@ SYNOPSIS
                 if r.HasError() {
                     rit.Croak(r.Error)
                 }
-                write.WriteFieldsln(r)
+                write.WriteRow(r)
                 rit.Next()
             }
         }
