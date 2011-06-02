@@ -4,7 +4,7 @@ package csvutil
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
 *  Created: Wed Jun  1 16:48:20 PDT 2011
 *  Description: Row related types and methods.
-*/
+ */
 import (
     "os"
 )
@@ -13,8 +13,8 @@ import (
 //  encapsulates any read error enountered along with any data read
 //  prior to encountering an error.
 type Row struct {
-	Fields []string "CSV row field data"
-	Error os.Error "Error encountered reading"
+    Fields []string "CSV row field data"
+    Error  os.Error "Error encountered reading"
 }
 
 //  A wrapper for the test r.Error == os.EOF

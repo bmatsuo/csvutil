@@ -15,7 +15,7 @@
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package csvutil
 
 import (
@@ -29,8 +29,10 @@ import (
 //  values of the resulting parsed matrix are verified against the [][]string
 //  matrix which created the CSV data.
 func makeTestCSVMatrix() [][]string {
-    var testfields [][]string = make([][]string, 3);
-    for i:=0 ; i<3 ; i++ { testfields[i] = make([]string, 3) }
+    var testfields [][]string = make([][]string, 3)
+    for i := 0; i < 3; i++ {
+        testfields[i] = make([]string, 3)
+    }
     testfields[0][0] = "field1"
     testfields[0][1] = "field2"
     testfields[0][2] = "field3"
@@ -42,16 +44,16 @@ func makeTestCSVMatrix() [][]string {
     testfields[2][2] = "15"
     return testfields
 }
-func makeTestCSVString () string {
+func makeTestCSVString() string {
     var testfields [][]string = makeTestCSVMatrix()
-    var rows []string = make([]string, 4);
+    var rows []string = make([]string, 4)
     rows[0] = strings.Join(testfields[0], ",")
     rows[1] = strings.Join(testfields[1], ",")
     rows[2] = strings.Join(testfields[2], ",")
     rows[3] = ""
     return strings.Join(rows, "\n")
 }
-func makeTestCSVInstance () ([][]string, string) {
+func makeTestCSVInstance() ([][]string, string) {
     return makeTestCSVMatrix(), makeTestCSVString()
 }
 // END TEST1

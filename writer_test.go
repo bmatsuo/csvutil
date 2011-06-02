@@ -14,7 +14,7 @@
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package csvutil
 
 import (
@@ -24,14 +24,14 @@ import (
 
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
-func TestWriteRow (T *testing.T) {
+func TestWriteRow(T *testing.T) {
     //var csvBuf []byte = make([]byte,0 , 200)
     var bwriter *bytes.Buffer = bytes.NewBufferString("")
     var csvw *Writer = NewWriter(bwriter)
     var csvMatrix = makeTestCSVMatrix()
     var n int = len(csvMatrix)
     var length = 0
-    for i:=0 ; i<n ; i++ {
+    for i := 0; i < n; i++ {
         nbytes, err := csvw.WriteFieldsln(csvMatrix[i])
         if err != nil {
             T.Errorf("Write error: %s\n", err.String())
@@ -53,7 +53,7 @@ func TestWriteRow (T *testing.T) {
     var csvStr string = makeTestCSVString()
     if output != csvStr {
         T.Errorf("Unexpected output.\n\nExpected:\n'%s'\nReceived:\n'%s'\n\n",
-                 csvStr, output);
+            csvStr, output)
     }
 }
 // END TEST1

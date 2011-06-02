@@ -1,6 +1,6 @@
 //  CSV data utilities for the Go programming language.
 //
-//  This is csvutil version 0.2_4
+//  This is csvutil version 0.2_42
 //
 package csvutil
 /* 
@@ -22,15 +22,14 @@ package csvutil
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
-import (
-)
+ */
+import ()
 
 //  The default CSV field separator is a comma ','. By default, field
 //  trimming is turned off for csvutil's I/O objects. But, when active,
 //  the default cutset is " \t", that is, (ASCII) whitespace.
 const (
-	DefaultSep  = ','
-	DefaultTrim = false
-	DefaultCutset = " \t"
+    DefaultSep    = ','
+    DefaultTrim   = false
+    DefaultCutset = " \t"
 )

@@ -18,7 +18,7 @@ package csvutil
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 import (
     "os"
 )
@@ -27,13 +27,13 @@ import (
 //  created. If the file exists, it is truncated upon opening. Requires
 //  that file permissions be specified. Recommended permissions are 0600,
 //  0622, and 0666 (6:rw, 4:w, 2:r). 
-func WriteFile(filename string, perm uint32,rows [][]string) (nbytes int, err os.Error) {
+func WriteFile(filename string, perm uint32, rows [][]string) (nbytes int, err os.Error) {
     var (
-        out *os.File
+        out  *os.File
         csvw *Writer
     )
     nbytes = 0
-    out, err = os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, perm)
+    out, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
     if err != nil {
         return nbytes, err
     }
@@ -49,7 +49,7 @@ func WriteFile(filename string, perm uint32,rows [][]string) (nbytes int, err os
 //  Read a named CSV file into a new slice of new string slices.
 func ReadFile(filename string) (rows [][]string, err os.Error) {
     var (
-        in *os.File
+        in   *os.File
         csvr *Reader
     )
     in, err = os.Open(filename)

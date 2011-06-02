@@ -14,7 +14,7 @@
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package csvutil
 
 import (
@@ -39,12 +39,13 @@ func cleanTestFile(f string, T *testing.T) {
 }
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
-var(
-    TestIn string = "_test-csvutil-01-i.csv"
-    TestOut string = "_test-csvutil-01-o.csv"
+var (
+    TestIn   string = "_test-csvutil-01-i.csv"
+    TestOut  string = "_test-csvutil-01-o.csv"
     TestPerm uint32 = 0622
 )
-func TestWriteFile (T *testing.T) {
+
+func TestWriteFile(T *testing.T) {
     var testFilename string = TestOut
     defer cleanTestFile(testFilename, T)
     mat, str := makeTestCSVInstance()
@@ -68,7 +69,7 @@ func TestWriteFile (T *testing.T) {
     }
 }
 
-func TestReadFile (T *testing.T) {
+func TestReadFile(T *testing.T) {
     var testFilename string = TestOut
     defer cleanTestFile(testFilename, T)
 
@@ -85,11 +86,11 @@ func TestReadFile (T *testing.T) {
     if len(inputMat) != len(mat) {
         T.Fatal("INPUT MISMATCH; number of rows")
     }
-    for i:=0 ; i<len(mat) ; i++ {
+    for i := 0; i < len(mat); i++ {
         if len(mat[i]) != len(inputMat[i]) {
             T.Errorf("INPUT MISMATCH; row %d", i)
         } else {
-            for j:=0 ; j<len(mat[i]) ; j++ {
+            for j := 0; j < len(mat[i]); j++ {
                 if mat[i][j] != inputMat[i][j] {
                     T.Errorf("INPUT MISMATCH; %d, %d", i, j)
                 }

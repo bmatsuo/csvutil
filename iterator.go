@@ -3,7 +3,7 @@ package csvutil
 *  File: iterator.go
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
 *  Created: Tue May 31 08:38:58 PDT 2011
-*/
+ */
 import (
     "os"
 )
@@ -26,9 +26,9 @@ import (
 //  This itererator is safe to break out of. For iterators meant for
 //  parsing an entire stream, see the ReaderRowIteratorAuto type.
 type ReaderRowIterator struct {
-    stopped bool
+    stopped  bool
     RowsChan <-chan Row
-    control chan<- bool
+    control  chan<- bool
 }
 
 //  A ReaderRowIteratorAuto is meant for reading until encountering the
@@ -49,7 +49,7 @@ type ReaderRowIterator struct {
 //  For iterating rows in a way such that the iteration can be stopped
 //  safely, use ReaderRowIterator objects instead.
 type ReaderRowIteratorAuto struct {
-    stopped bool
+    stopped  bool
     RowsChan <-chan Row
 }
 
@@ -81,43 +81,43 @@ func (csvri *ReaderRowIterator) Croak(err os.Error) {
 }
 
 //  Create a new row iterator and return it.
-func (csvr *Reader) RowIter() (*ReaderRowIterator) {
+func (csvr *Reader) RowIter() *ReaderRowIterator {
     ri := new(ReaderRowIterator)
     throughChan := make(chan Row)
-    controlChan := make (chan bool)
+    controlChan := make(chan bool)
     ri.RowsChan = throughChan
     ri.control = controlChan
-	var read_rows = func (r chan<- Row, c <-chan bool) {
+    var read_rows = func(r chan<- Row, c <-chan bool) {
         /* Deferring may be unnecessary now (its NOT desired in this context).
-            defer func() {
-                x:=recover()
-                if x !=nil {
-                }
-            } ()
+           defer func() {
+               x:=recover()
+               if x !=nil {
+               }
+           } ()
         */
-		for true {
+        for true {
             cont, ok := <-c
             if !ok || !cont {
                 break
             }
-            csvr.LastRow = Row{Fields:nil, Error:nil}
-			var row Row = csvr.ReadRow()
-			if row.HasEOF() {
-				break
+            csvr.LastRow = Row{Fields: nil, Error: nil}
+            var row Row = csvr.ReadRow()
+            if row.HasEOF() {
+                break
             }
-			if row.Fields == nil {
+            if row.Fields == nil {
                 if row.HasError() {
-				    panic(row.Error)
+                    panic(row.Error)
                 }
                 panic("nilfields")
-			}
+            }
             csvr.LastRow = row
-			r <- row
-		}
-		close(r)
-	}
-	go read_rows(throughChan, controlChan)
-	return ri
+            r <- row
+        }
+        close(r)
+    }
+    go read_rows(throughChan, controlChan)
+    return ri
 }
 
 //  For convenience, return a new ReaderRowIterator rit that has
@@ -129,34 +129,33 @@ func (csvr *Reader) RowIterStarted() (rit *ReaderRowIterator) {
 }
 
 // Create a new ReaderRowIteratorAuto object and return it.
-func (csvr *Reader) RowIterAuto() (*ReaderRowIteratorAuto) {
+func (csvr *Reader) RowIterAuto() *ReaderRowIteratorAuto {
     ri := new(ReaderRowIteratorAuto)
     throughChan := make(chan Row)
     ri.RowsChan = throughChan
-	var read_rows = func (r chan<- Row) {
+    var read_rows = func(r chan<- Row) {
         defer func() {
-            if x:=recover(); x!=nil {
+            if x := recover(); x != nil {
                 /* Do nothing. */
             }
-        } ()
-		for true {
-            csvr.LastRow = Row{Fields:nil, Error:nil}
-			var row Row = csvr.ReadRow()
-			if row.HasEOF() {
-				break
+        }()
+        for true {
+            csvr.LastRow = Row{Fields: nil, Error: nil}
+            var row Row = csvr.ReadRow()
+            if row.HasEOF() {
+                break
             }
-			if row.Fields == nil {
+            if row.Fields == nil {
                 if row.HasError() {
-				    panic(row.Error)
+                    panic(row.Error)
                 }
                 panic("nilfields")
-			}
+            }
             csvr.LastRow = row
-			r <- row
-		}
-		close(r)
-	}
-	go read_rows(throughChan)
-	return ri
+            r <- row
+        }
+        close(r)
+    }
+    go read_rows(throughChan)
+    return ri
 }
-

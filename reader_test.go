@@ -14,7 +14,7 @@
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package csvutil
 
 import (
@@ -24,7 +24,7 @@ import (
 
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
-func TestReadRow (T *testing.T) {
+func TestReadRow(T *testing.T) {
     T.Log("Beginning test\n")
     var csvStr string = makeTestCSVString()
     var sreader *strings.Reader = strings.NewReader(csvStr)
@@ -46,7 +46,7 @@ func TestReadRow (T *testing.T) {
             T.Errorf("Unexpected row size %d (!= %d)\n", k, n)
         }
         var j int = 0
-        for j=0 ; j<k ; j++ {
+        for j = 0; j < k; j++ {
             var field string = row.Fields[j]
             if len(field) < 1 {
                 T.Error("Unexpected non-empty string\n")
@@ -56,14 +56,14 @@ func TestReadRow (T *testing.T) {
         i++
     }
     var test_matrix [][]string = makeTestCSVMatrix()
-    var assert_val = func (i,j int) {
+    var assert_val = func(i, j int) {
         if rows[i][j] != test_matrix[i][j] {
             T.Errorf("Unexpected value in (%d,%d), %s", i, j, rows[i][j])
         }
     }
-    for i:=0 ; i<n ; i++ {
-        for j:=0 ; j<n ; j++ {
-            assert_val(i,j)
+    for i := 0; i < n; i++ {
+        for j := 0; j < n; j++ {
+            assert_val(i, j)
         }
     }
     T.Log("Finished test\n")

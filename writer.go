@@ -19,7 +19,7 @@ package csvutil
 *
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 import (
     "os"
     "io"
@@ -30,9 +30,9 @@ import (
 
 // A simple CSV file writer.
 type Writer struct {
-    Sep int "CSV Field seperator."
-    w io.Writer "Base writer object."
-    bw *bufio.Writer "Base writer object."
+    Sep int           "CSV Field seperator."
+    w   io.Writer     "Base writer object."
+    bw  *bufio.Writer "Base writer object."
 }
 
 //  Create a new CSV writer with the default field seperator and a
@@ -55,7 +55,7 @@ func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
     csvw.Sep = DefaultSep
     csvw.w = w
     var bufErr os.Error
-    csvw.bw, bufErr = bufio.NewWriterSize(w,n)
+    csvw.bw, bufErr = bufio.NewWriterSize(w, n)
     return csvw, bufErr
 }
 
@@ -72,7 +72,7 @@ func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error) {
 //  fields if desired. 
 func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
     var b []byte = make([]byte, len(str))
-    copy(b,str)
+    copy(b, str)
     return csvw.Write(b)
 }
 
@@ -81,12 +81,12 @@ func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
 func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
     // Some code modified from
     //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
-    var rb []byte = make([]byte,utf8.UTFMax)
-	/* Do I want int64 separators?
-        rune := int(c) 
-	    if int64(rune) != c { rune = utf8.RuneError }
+    var rb []byte = make([]byte, utf8.UTFMax)
+    /* Do I want int64 separators?
+       rune := int(c) 
+       if int64(rune) != c { rune = utf8.RuneError }
     */
-	w := utf8.EncodeRune(rb, csvw.Sep)
+    w := utf8.EncodeRune(rb, csvw.Sep)
     var sep string = string(rb[0:w])
     var i int = strings.Index(str, sep)
     if i != -1 {
@@ -108,14 +108,14 @@ func (csvw *Writer) WriteField(field string, ln bool) (nbytes int, err os.Error)
     }
     // Some code modified from
     //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
-    var rb []byte = make([]byte,utf8.UTFMax) // A utf8 rune buffer.
-	/* Do I want int64 separators? 
+    var rb []byte = make([]byte, utf8.UTFMax) // A utf8 rune buffer.
+    /* Do I want int64 separators? 
         rune := int(c) 
-	    if int64(rune) != c { rune = utf8.RuneError }
+       	if int64(rune) != c { rune = utf8.RuneError }
     */
-	rbLen := utf8.EncodeRune(rb, trailChar)
+    rbLen := utf8.EncodeRune(rb, trailChar)
     var fLen int = len(field)
-    var bp []byte = make([]byte, fLen, fLen + rbLen)
+    var bp []byte = make([]byte, fLen, fLen+rbLen)
     copy(bp, field)
     return csvw.Write(append(bp, rb[0:rbLen]...))
 }
@@ -126,10 +126,10 @@ func (csvw *Writer) WriteFields(fields []string) (int, os.Error) {
     var n int = len(fields)
     var success int = 0
     var err os.Error
-    for i:=0 ; i<n ; i++ {
+    for i := 0; i < n; i++ {
         nbytes, err := csvw.WriteField(fields[i], false)
         success += nbytes
-        if nbytes < len(fields[i]) + utf8.RuneLen(csvw.Sep) {
+        if nbytes < len(fields[i])+utf8.RuneLen(csvw.Sep) {
             return success, err
         }
     }
@@ -142,7 +142,7 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
     var n int = len(fields)
     var success int = 0
     var err os.Error
-    for i:=0 ; i<n ; i++ {
+    for i := 0; i < n; i++ {
         var onLastField bool = i == n-1
         nbytes, err := csvw.WriteField(fields[i], onLastField)
         success += nbytes
@@ -152,7 +152,7 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
             trail = '\n'
         }
 
-        if nbytes < len(fields[i]) + utf8.RuneLen(trail) {
+        if nbytes < len(fields[i])+utf8.RuneLen(trail) {
             return success, err
         }
     }
@@ -183,7 +183,7 @@ func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
     var success, nbytes int
     var err os.Error
     success = 0
-    for i:=0 ; i<len(rows) ; i++ {
+    for i := 0; i < len(rows); i++ {
         nbytes, err = csvw.WriteFieldsln(rows[i])
         success += nbytes
         if err != nil {
