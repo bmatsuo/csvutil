@@ -16,7 +16,7 @@ SYNOPSIS
             reader.Trim = true
             writer := csvutil.NewWriter(os.Stdout)
             rit := reader.RowIterStarted()
-            for r := range rit.Rows {
+            for r := range rit.RowsChan {
                 if r.HasError() {
                     rit.Croak(r.Error)
                 }
@@ -61,19 +61,14 @@ INSTALL
 
 DOCUMENTATION
 
-    The best way to read the current csvutil documentation is through
+    The best way to read the current csvutil documentation is using
     godoc.
 
-        godoc github.com/bmatsuo/csvutil
+        godoc -http=":6060"
 
-    This presents a lot of information. You can instead use one of the
-    following commands to get information about the more specific and
-    useful parts of csvutil
+    Then go to the url
 
-        godoc github.com/bmatsuo/csvutil Reader
-        godoc github.com/bmatsuo/csvutil ReadFile
-        godoc github.com/bmatsuo/csvutil Write
-        godoc github.com/bmatsuo/csvutil WriteFile
+        http://localhost:6060/pkg/github.com/bmatsuo/csvutil/
 
 COPYRIGHT & LICENSE
 
