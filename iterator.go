@@ -42,7 +42,7 @@ type ReaderRowIterator struct {
 //          var fields []string = r.Fields
 //          // Process the desired entries of "fields".
 //      }
-//  This iteration using a range statement as above, it is not safe to
+//  This iteration, using a range statement as above, makes it unsafe to
 //  break out of the loop. This generally causes the 'loss' of at least
 //  one row.
 //
@@ -58,7 +58,7 @@ func (csvri *ReaderRowIterator) Next() {
     if csvri.stopped {
         panic("stopped")
     }
-    csvri.control <- true
+    go func () { csvri.control <- true }()
 }
 
 //  Tell the iterator to stop fetching rows and exit its goroutine.
@@ -74,7 +74,7 @@ func (csvri *ReaderRowIterator) Break() {
 }
 
 //  Like (*ReaderRowIterator) Break(), but also panics afterward. This
-//  helps if its possible that the panic could be recovered.
+//  helps if it's possible that the panic could be recovered from.
 func (csvri *ReaderRowIterator) Croak(err os.Error) {
     csvri.Break()
     panic(err)

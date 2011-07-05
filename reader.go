@@ -25,6 +25,7 @@ import (
     "bufio"
     "strings"
     "os"
+    //"fmt"
 )
 
 //  ReaderBufferMinimumSize is the smallest csvutil will allow the
@@ -98,8 +99,11 @@ func (csvr *Reader) ReadRow() Row {
             }
             csvr.p = make([]byte, pLen, pLen)
             csvr.pi = 0
-        } else if csvr.pi+readLen > pLen {
+        } else if csvr.pi+readLen >= pLen {
             newLen := 2 * pLen
+            for csvr.pi+readLen > newLen {
+                newLen *= 2
+            }
             csvr.p = make([]byte, newLen, newLen)
             csvr.pi = 0
         }
@@ -111,6 +115,9 @@ func (csvr *Reader) ReadRow() Row {
         } else {
             // isPrefix is false here. The loop will break next iteration.
             for i, b = range readLine {
+                if len(csvr.p) <= csvr.pi+i {
+                    panic("badallocationsize")
+                }
                 csvr.p[csvr.pi+i] = b
             }
             csvr.pi += i + 1
