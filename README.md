@@ -33,25 +33,25 @@ write CSV data to any io.Writer.
 About
 =====
 
-The csvutil package is written to make interacting with CSV data as
-easy as possible. Efficiency of its underlying functions and methods
-are slightly less important factors in its design. However, that being
-said, it is important. And, csvutil should be capable of handling
-both extremely large and fairly small streams of CSV data through input
-and output quite well in terms of speed and memory footprint. It should
-do this while not making your code bend over backwards (more than
-necessary). As libraries should never make you do.
+The csvutil package is written to make interacting with CSV data as easy
+as possible. Efficiency of its underlying functions and methods are
+slightly less important factors in its design. However, that being said,
+**it is important**. And, csvutil should be capable of handling both
+extremely large and fairly small streams of CSV data through input and
+output quite well in terms of speed and memory footprint. It should do
+this while not making your code bend over backwards (more than necessary).
+As libraries should never make you do.
 
 Features
 ========
 
-* Slurping and spewing CSV data. That is, reading/writing whole files/data
+* Slurping/spewing CSV data. That is, reading/writing whole files or data
 streams at once.
 
 * Iteration through individual rows of a CSV data stream for a smaller
 memory footprint.
 
-* Writing of individual writing fields/rows as well as batch writing.
+* Writing of individual writing fields/rows (along with batch writing).
 
 Todo
 ====
@@ -82,19 +82,8 @@ Then go to the url http://localhost:6060/pkg/github.com/bmatsuo/csvutil/
 Copyright & License
 ===================
 
-Copyright (c) 2011 by Bryan Matsuo <bmatsuo@soe.ucsc.edu>
+Copyright (c) 2011, Bryan Matsuo.
+All rights reserved.
 
-This file is part of csvutil.
-
-csvutil is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-csvutil is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser Public License for more details.
-
-You should have received a copy of the GNU Lesser Public License
-along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
