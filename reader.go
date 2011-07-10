@@ -169,15 +169,11 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
     err = nil
     var rbuf [][]string = make([][]string, 0, size)
     csvr.Do(func(r Row)bool {
-        if r.Error != nil {
-            err = r.Error
-            if r.Fields != nil {
-                rbuf = append(rbuf, r.Fields)
-            }
-            return false
+        err = r.Error
+        if r.Fields != nil {
+            rbuf = append(rbuf, r.Fields)
         }
-        rbuf = append(rbuf, r.Fields)
-        return true
+        return err != nil
     } )
     return rbuf, err
 }
