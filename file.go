@@ -20,49 +20,77 @@ package csvutil
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
  */
 import (
+    "io"
     "os"
 )
+
+//  Write a slice of rows (string slices) to an io.Writer object.
+func Write(w io.Writer, rows [][]string) (int, os.Error) {
+    var (
+        csvw        = NewWriter(w)
+        nbytes, err = csvw.WriteRows(rows)
+    )
+    if err != nil {
+        return nbytes, err
+    }
+    return nbytes, csvw.Flush()
+}
 
 //  Write CSV data to a named file. If the file does not exist, it is
 //  created. If the file exists, it is truncated upon opening. Requires
 //  that file permissions be specified. Recommended permissions are 0600,
 //  0622, and 0666 (6:rw, 4:w, 2:r). 
-func WriteFile(filename string, perm uint32, rows [][]string) (nbytes int, err os.Error) {
+func WriteFile(filename string, perm uint32, rows [][]string) (int, os.Error) {
     var (
-        out  *os.File
-        csvw *Writer
+        out    *os.File
+        nbytes int
+        err    os.Error
+        mode   = os.O_WRONLY|os.O_CREATE|os.O_TRUNC
     )
-    nbytes = 0
-    out, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
-    if err != nil {
+    if out, err = os.OpenFile(filename, mode, perm); err != nil {
         return nbytes, err
     }
-    csvw = NewWriter(out)
-    nbytes, err = csvw.WriteRows(rows)
-    if err != nil {
-        return nbytes, err
-    }
-    err = csvw.Flush()
-    if err != nil {
+    if nbytes, err = Write(out, rows); err != nil {
         return nbytes, err
     }
     return nbytes, out.Close()
 }
 
+//  Read rows from an io.Reader until EOF is encountered.
+func Read(r io.Reader) ([][]string, os.Error) {
+    var csvr = NewReader(r)
+    return csvr.RemainingRows()
+}
+
+
 //  Read a named CSV file into a new slice of new string slices.
-func ReadFile(filename string) (rows [][]string, err os.Error) {
+func ReadFile(filename string) ([][]string, os.Error) {
     var (
         in   *os.File
-        csvr *Reader
+        rows [][]string
+        err  os.Error
     )
-    in, err = os.Open(filename)
-    if err != nil {
+    if in, err = os.Open(filename); err != nil {
         return rows, err
     }
-    csvr = NewReader(in)
-    rows, err = csvr.RemainingRows()
-    if err != nil {
+    if rows, err = Read(in); err != nil {
         return rows, err
     }
     return rows, in.Close()
+}
+
+//  Iteratively apply a function to Row objects read from an io.Reader.
+func Do(r io.Reader, f func(r Row) bool) {
+    var csvr = NewReader(r)
+    csvr.Do(f)
+}
+
+//  Iteratively apply a function to Row objects read from a named file.
+func DoFile(filename string, f func(r Row) bool) os.Error {
+    var in, err = os.Open(filename)
+    if err != nil {
+        return err
+    }
+    Do(in, f)
+    return in.Close()
 }
