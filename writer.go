@@ -25,7 +25,7 @@ import (
     "io"
     "bufio"
     "utf8"
-    "strings"
+    //"strings"
 )
 
 //  A simple CSV file writer using the package bufio for effeciency.
@@ -66,7 +66,7 @@ func (csvw *Writer) write(p []byte) (nbytes int, err os.Error) {
     nbytes, err = csvw.bw.Write(p)
     return
 }
-
+/*
 //  Write a string to the data stream. No checking for containment of
 //  the separator is done, so this file can be used to write multiple
 //  fields if desired. 
@@ -82,10 +82,9 @@ func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
     // Some code modified from
     //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
     var rb []byte = make([]byte, utf8.UTFMax)
-    /* Do I want int64 separators?
-       rune := int(c) 
-       if int64(rune) != c { rune = utf8.RuneError }
-    */
+    //Do I want int64 separators?
+    //rune := int(c) 
+    //if int64(rune) != c { rune = utf8.RuneError }
     w := utf8.EncodeRune(rb, csvw.Sep)
     var sep string = string(rb[0:w])
     var i int = strings.Index(str, sep)
@@ -94,6 +93,7 @@ func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
     }
     return csvw.WriteString(str)
 }
+*/
 
 //  Write a single field of CSV data. If the ln argument is true, a
 //  trailing new line is printed after the field. Otherwise, when
