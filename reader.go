@@ -153,7 +153,7 @@ func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
             rbuf[i] = r.Fields
             i++
         }
-        return err != nil
+        return r.HasError()
     } )
     return i, err
 }
@@ -173,7 +173,7 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
         if r.Fields != nil {
             rbuf = append(rbuf, r.Fields)
         }
-        return err != nil
+        return r.HasError()
     } )
     return rbuf, err
 }
