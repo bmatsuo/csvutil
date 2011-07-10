@@ -29,7 +29,7 @@ import (
 )
 
 //  A simple CSV file writer using the package bufio for effeciency.
-//  But, Because of this, the method Flush() must be called to ensure
+//  But, because of this, the method Flush() must be called to ensure
 //  data is written to any given io.Writer before it is closed.
 type Writer struct {
     Sep int           "CSV Field seperator."
@@ -62,7 +62,7 @@ func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
 //  Write a slice of bytes to the data stream. No checking for containment
 //  of the separator is done, so this file can be used to write multiple
 //  fields if desired.
-func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error) {
+func (csvw *Writer) write(p []byte) (nbytes int, err os.Error) {
     nbytes, err = csvw.bw.Write(p)
     return
 }
@@ -73,7 +73,7 @@ func (csvw *Writer) Write(p []byte) (nbytes int, err os.Error) {
 func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
     var b []byte = make([]byte, len(str))
     copy(b, str)
-    return csvw.Write(b)
+    return csvw.write(b)
 }
 
 //  Attempt to write a string to underlying io.Writer, but panic if a
@@ -117,7 +117,7 @@ func (csvw *Writer) writeField(field string, ln bool) (nbytes int, err os.Error)
     var fLen int = len(field)
     var bp []byte = make([]byte, fLen, fLen+rbLen)
     copy(bp, field)
-    return csvw.Write(append(bp, rb[0:rbLen]...))
+    return csvw.write(append(bp, rb[0:rbLen]...))
 }
 
 //  Write a slice of field values with a trailing field seperator (no '\n').
