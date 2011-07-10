@@ -99,25 +99,21 @@ func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
 //  trailing new line is printed after the field. Otherwise, when
 //  the ln argument is false, a separator character is printed after
 //  the field.
-func (csvw *Writer) writeField(field string, ln bool) (nbytes int, err os.Error) {
-    var trailChar int
-    if ln {
-        trailChar = '\n'
-    } else {
-        trailChar = csvw.Sep
-    }
-    // Some code modified from
+func (csvw *Writer) writeField(field string, ln bool) (int, os.Error) {
+    // Contains some code modified from
     //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
-    var rb []byte = make([]byte, utf8.UTFMax) // A utf8 rune buffer.
-    /* Do I want int64 separators? 
-        rune := int(c) 
-       	if int64(rune) != c { rune = utf8.RuneError }
-    */
-    rbLen := utf8.EncodeRune(rb, trailChar)
-    var fLen int = len(field)
-    var bp []byte = make([]byte, fLen, fLen+rbLen)
+    var (
+        fLen  = len(field)
+        bp    = make([]byte, fLen+utf8.UTFMax)
+        trail int
+    )
+    if ln {
+        trail = '\n'
+    } else {
+        trail = csvw.Sep
+    }
     copy(bp, field)
-    return csvw.write(append(bp, rb[0:rbLen]...))
+    return csvw.write(bp[:fLen+utf8.EncodeRune(bp[fLen:], trail)])
 }
 
 //  Write a slice of field values with a trailing field seperator (no '\n').
