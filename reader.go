@@ -206,6 +206,38 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
     return rbuf, err
 }
 
+//  Iteratively read the remaining rows in the reader and call f on each
+//  of them. If f returns false, no more rows will be read.
+func (csvr *Reader) Do(f func(Row) bool) {
+    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
+        if r.HasEOF() {
+            break
+        }
+        f(r)
+    }
+}
+
+//  Process rows from the reader like Do, but stop after processing n of
+//  them. If f returns false before n rows have been process, no more rows
+//  will be processed.
+func (csvr *Reader) DoN(n int, f func(Row) bool) {
+    var (
+        i       int
+        fprime  = func(r Row) bool {
+            if i < n {
+                return f(r)
+            }
+            return false
+        }
+    )
+    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
+        if r.HasEOF() {
+            break
+        }
+        fprime(r)
+    }
+}
+
 //  A function routine for setting all the configuration variables of a
 //  csvutil.Reader in a single line.
 func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
