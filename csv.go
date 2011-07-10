@@ -1,8 +1,3 @@
-//  CSV data utilities for the Go programming language.
-//
-//  This is csvutil version 0.2_51
-//
-package csvutil
 /* 
 *  File: csv.go
 *  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
@@ -23,6 +18,9 @@ package csvutil
 *   You should have received a copy of the GNU Lesser Public License
 *   along with csvutil.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+//  CSV data utilities for the Go programming language.
+package csvutil
 import ()
 
 //  The default CSV field separator is a comma ','. By default, field
