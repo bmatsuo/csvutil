@@ -28,7 +28,9 @@ import (
     "strings"
 )
 
-// A simple CSV file writer.
+//  A simple CSV file writer using the package bufio for effeciency.
+//  But, Because of this, the method Flush() must be called to ensure
+//  data is written to any given io.Writer before it is closed.
 type Writer struct {
     Sep int           "CSV Field seperator."
     w   io.Writer     "Base writer object."
@@ -36,9 +38,7 @@ type Writer struct {
 }
 
 //  Create a new CSV writer with the default field seperator and a
-//  buffer of some default size.
-//
-//      See bufio.NewWriter(io.Writer, int) (*bufio.NewWriter).
+//  buffer of a default size.
 func NewWriter(w io.Writer) *Writer {
     csvw := new(Writer)
     csvw.Sep = DefaultSep
@@ -99,7 +99,7 @@ func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
 //  trailing new line is printed after the field. Otherwise, when
 //  the ln argument is false, a separator character is printed after
 //  the field.
-func (csvw *Writer) WriteField(field string, ln bool) (nbytes int, err os.Error) {
+func (csvw *Writer) writeField(field string, ln bool) (nbytes int, err os.Error) {
     var trailChar int
     if ln {
         trailChar = '\n'
@@ -120,14 +120,14 @@ func (csvw *Writer) WriteField(field string, ln bool) (nbytes int, err os.Error)
     return csvw.Write(append(bp, rb[0:rbLen]...))
 }
 
-//  Write a slice of field values with a trailing field seperator and no '\n'.
+//  Write a slice of field values with a trailing field seperator (no '\n').
 //  Returns any error incurred from writing.
-func (csvw *Writer) WriteFields(fields []string) (int, os.Error) {
+func (csvw *Writer) WriteFields(fields...string) (int, os.Error) {
     var n int = len(fields)
     var success int = 0
     var err os.Error
     for i := 0; i < n; i++ {
-        nbytes, err := csvw.WriteField(fields[i], false)
+        nbytes, err := csvw.writeField(fields[i], false)
         success += nbytes
         if nbytes < len(fields[i])+utf8.RuneLen(csvw.Sep) {
             return success, err
@@ -136,15 +136,38 @@ func (csvw *Writer) WriteFields(fields []string) (int, os.Error) {
     return success, err
 }
 
-// Write a slice of field values with a trailing new line '\n'.
-// Returns any error incurred from writing.
-func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
+/*
+func (csvw *Writer) WriteFieldsln(fields...string) (int, os.Error) {
     var n int = len(fields)
     var success int = 0
     var err os.Error
     for i := 0; i < n; i++ {
         var onLastField bool = i == n-1
-        nbytes, err := csvw.WriteField(fields[i], onLastField)
+        nbytes, err := csvw.writeField(fields[i], onLastField)
+        success += nbytes
+
+        var trail int = csvw.Sep
+        if onLastField {
+            trail = '\n'
+        }
+
+        if nbytes < len(fields[i])+utf8.RuneLen(trail) {
+            return success, err
+        }
+    }
+    return success, err
+}
+*/
+
+// Write a slice of field values with a trailing new line '\n'.
+// Returns any error incurred from writing.
+func (csvw *Writer) WriteRow(fields...string) (int, os.Error) {
+    var n int = len(fields)
+    var success int = 0
+    var err os.Error
+    for i := 0; i < n; i++ {
+        var onLastField bool = i == n-1
+        nbytes, err := csvw.writeField(fields[i], onLastField)
         success += nbytes
 
         var trail int = csvw.Sep
@@ -159,36 +182,22 @@ func (csvw *Writer) WriteFieldsln(fields []string) (int, os.Error) {
     return success, err
 }
 
-//  Like (*Writer) WriteFieldsln ([]string). But, writing is followed by
-//  a flushing of any buffered output. The number of bytes writen to the
-//  underlying io.Writer is returned along with any error encountered
-//  while writing (or during the flush that follows an error-free write)
-//  is returned.
-func (csvw *Writer) WriteRow(fields []string) (int, os.Error) {
-    nbytes, err := csvw.WriteFieldsln(fields)
-    if err == nil {
-        return nbytes, err
-    }
-    return nbytes, csvw.Flush()
-}
-
 //  Flush any buffered data to the underlying io.Writer.
 func (csvw *Writer) Flush() os.Error {
     return csvw.bw.Flush()
 }
 
-//  Write multple CSV rows at once. The output buffer is flushed after
-//  the last Write operation.
+//  Write multple CSV rows at once.
 func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
     var success, nbytes int
     var err os.Error
     success = 0
     for i := 0; i < len(rows); i++ {
-        nbytes, err = csvw.WriteFieldsln(rows[i])
+        nbytes, err = csvw.WriteRow(rows[i]...)
         success += nbytes
         if err != nil {
             return success, err
         }
     }
-    return success, csvw.Flush()
+    return success, nil
 }

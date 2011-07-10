@@ -32,10 +32,12 @@ func TestWriteRow(T *testing.T) {
     var n int = len(csvMatrix)
     var length = 0
     for i := 0; i < n; i++ {
-        nbytes, err := csvw.WriteFieldsln(csvMatrix[i])
+        nbytes, err := csvw.WriteRow(csvMatrix[i]...)
         if err != nil {
             T.Errorf("Write error: %s\n", err.String())
-        } else {
+        }
+        errFlush := csvw.Flush()
+        if errFlush != nil {
             T.Logf("Wrote %d bytes on row %d\n", nbytes, i)
         }
         length += nbytes
@@ -44,7 +46,7 @@ func TestWriteRow(T *testing.T) {
     if flushErr != nil {
         T.Errorf("Error flushing output; %v\n", flushErr)
     }
-    var output string = string(bwriter.Bytes())
+    var output string = bwriter.String()
     if len(output) == 0 {
         T.Error("Read 0 bytes\n")
     } else {

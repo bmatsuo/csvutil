@@ -1,8 +1,8 @@
-    csvutil - ...like hitting CSV data with a sledgehammer made of pure Go.
+    csvutil - Your CSV pocket-knife (golang)
 
 VERSION
 
-    This is csutil version 0.2_51
+    This is csutil version 0.2_55
 
 SYNOPSIS
 

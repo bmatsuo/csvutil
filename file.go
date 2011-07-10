@@ -42,8 +42,11 @@ func WriteFile(filename string, perm uint32, rows [][]string) (nbytes int, err o
     if err != nil {
         return nbytes, err
     }
-    err = out.Close()
-    return nbytes, err
+    err = csvw.Flush()
+    if err != nil {
+        return nbytes, err
+    }
+    return nbytes, out.Close()
 }
 
 //  Read a named CSV file into a new slice of new string slices.
@@ -61,6 +64,5 @@ func ReadFile(filename string) (rows [][]string, err os.Error) {
     if err != nil {
         return rows, err
     }
-    err = in.Close()
-    return rows, err
+    return rows, in.Close()
 }
