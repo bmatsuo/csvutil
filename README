@@ -15,14 +15,13 @@ SYNOPSIS
             reader := csvutil.NewReader(os.Stdin)
             reader.Trim = true
             writer := csvutil.NewWriter(os.Stdout)
-            rit := reader.RowIterStarted()
-            for r := range rit.RowsChan {
+            reader.Do(func (r Row) bool {
                 if r.HasError() {
-                    rit.Croak(r.Error)
+                    panic(r.Error)
                 }
-                write.WriteRow(r.Fields)
-                rit.Next()
-            }
+                writer.WriteRow(r.Fields)
+                return true
+            })
         }
 
 ABOUT

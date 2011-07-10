@@ -22,6 +22,25 @@ import (
     "strings"
 )
 
+func TestDo(T *testing.T) {
+    var csvStr string = makeTestCSVString()
+    var sreader *strings.Reader = strings.NewReader(csvStr)
+    var csvr *Reader = NewReader(sreader)
+    var rowlen = -1
+    csvr.Do(func(r Row) bool {
+        if r.HasError() {
+            T.Errorf("Read error encountered: %v", r.Error)
+            return false
+        }
+        if rowlen == -1 {
+            rowlen = len(r.Fields)
+        } else if rowlen != len(r.Fields) {
+            T.Error("Row length error, non-rectangular.")
+        }
+        return true
+    })
+}
+
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 func TestReadRow(T *testing.T) {
