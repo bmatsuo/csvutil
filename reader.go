@@ -64,71 +64,66 @@ func NewReaderSize(r io.Reader, size int) *Reader {
     return csvr
 }
 
+func (csvr *Reader) readLine() (string, os.Error) {
+    var (
+        isPrefix = true
+        piece    []byte
+        err      os.Error
+    )
+    for isPrefix {
+        piece, isPrefix, err = csvr.br.ReadLine()
+        switch err {
+        case nil:
+            break
+        case os.EOF:
+            fallthrough
+        default:
+            return "", err
+        }
+        var (
+            readLen = len(piece)
+            necLen = csvr.pi+readLen
+            pLen = len(csvr.p)
+        )
+        if pLen == 0 {
+            if pLen = readerBufferMinimumSize; pLen < necLen {
+                pLen = necLen
+            }
+            csvr.p = make([]byte, pLen)
+            csvr.pi = 0
+        } else if pLen < necLen {
+            if pLen = 2 * pLen; pLen < necLen {
+                pLen = necLen
+            }
+            var p = make([]byte, pLen)
+            copy(p, csvr.p[:csvr.pi])
+        }
+        csvr.pi += copy(csvr.p[csvr.pi:], piece)
+    }
+    //var p = make([]byte, csvr.pi)
+    //copy(p, csvr.p[:csvr.pi])
+    //return p, nil
+    var s = string(csvr.p[:csvr.pi])
+    for i := 0; i < csvr.pi; i++ {
+        csvr.p[i] = 0
+    }
+    csvr.pi = 0
+    return s, nil
+}
+
 //  Attempt to read up to a new line. Return a Row object containing
 //  the fields read and any error encountered.
 func (csvr *Reader) ReadRow() Row {
     /* Read one row of the CSV and and return an array of the fields. */
     var (
-        r              Row
-        line, readLine []byte
-        err            os.Error
-        isPrefix       bool
-        i              int
-        b              byte
+        r    Row
+        line string
     )
-    r = Row{Fields: nil, Error: nil}
-    isPrefix = true
-    for isPrefix {
-        readLine, isPrefix, err = csvr.br.ReadLine()
-        r.Fields = nil
-        r.Error = err
-        if err == os.EOF {
-            return r
-        }
-        if err != nil {
-            return r
-        }
-        readLen := len(readLine)
-        pLen := len(csvr.p)
-        if csvr.p == nil {
-            pLen := 2 * readLen
-            if pLen < readerBufferMinimumSize {
-                pLen = readerBufferMinimumSize
-            }
-            csvr.p = make([]byte, pLen, pLen)
-            csvr.pi = 0
-        } else if csvr.pi+readLen >= pLen {
-            newLen := 2 * pLen
-            for csvr.pi+readLen > newLen {
-                newLen *= 2
-            }
-            csvr.p = make([]byte, newLen, newLen)
-            csvr.pi = 0
-        }
-        if isPrefix {
-            for i, b = range readLine {
-                csvr.p[csvr.pi+i] = b
-            }
-            csvr.pi += i + 1
-        } else {
-            // isPrefix is false here. The loop will break next iteration.
-            for i, b = range readLine {
-                if len(csvr.p) <= csvr.pi+i {
-                    panic("badallocationsize")
-                }
-                csvr.p[csvr.pi+i] = b
-            }
-            csvr.pi += i + 1
-        }
+    if line, r.Error = csvr.readLine(); r.Error != nil {
+        return r
     }
-    line = csvr.p[:csvr.pi]
     r.Fields = strings.FieldsFunc(
-        string(line),
-        func(c int) bool { return c == csvr.Sep })
-    for i := 0; i < csvr.pi; i++ {
-        csvr.p[i] = 0
-    }
-    csvr.pi = 0
+        line, func(c int) bool { return c == csvr.Sep })
     if csvr.Trim {
         for i := 0; i < len(r.Fields); i++ {
             r.Fields[i] = strings.Trim(r.Fields[i], csvr.Cutset)
