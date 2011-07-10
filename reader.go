@@ -39,7 +39,7 @@ type Reader struct {
     Trim    bool          // Remove excess whitespace from field values.
     Cutset  string        // Set of characters to trim.
     r       io.Reader     // Base reader object.
-    br      *bufio.Reader // For reading lines.
+    br      *bufio.Reader // Buffering for efficiency and line reading.
     p       []byte        // A buffer for longer lines
     pi      int           // An index into the p buffer.
 }
