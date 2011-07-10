@@ -17,11 +17,11 @@ write CSV data to any io.Writer.
 
     func main() {
         writer := csvutil.NewWriter(os.Stdout)
-        err := reader.DoFile(os.Args[1], func (r Row) bool {
+        err := csvutil.DoFile(os.Args[1], func (r csvutil.Row) bool {
             if r.HasError() {
                 panic(r.Error)
             }
-            writer.WriteRow(r.Fields)
+            writer.WriteRow(r.Fields...)
             return true
         } )
         if err != nil {
