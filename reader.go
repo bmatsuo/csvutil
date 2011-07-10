@@ -28,22 +28,20 @@ import (
     //"fmt"
 )
 
-//  ReaderBufferMinimumSize is the smallest csvutil will allow the
+//  readerBufferMinimumSize is the smallest csvutil will allow the
 //  Reader's internal "long-line buffer" to be allocated as.
-const (
-    ReaderBufferMinimumSize = 30
-)
+const readerBufferMinimumSize = 30
 
 //  A reader object for CSV data utilizing the bufio package.
 type Reader struct {
-    Sep     int           "Field separator character."
-    Trim    bool          "Remove excess whitespace from field values."
-    Cutset  string        "Set of characters to trim."
-    LastRow Row           "The last row read by the Reader."
-    r       io.Reader     "Base reader object."
-    br      *bufio.Reader "For reading lines."
-    p       []byte        "A buffer for longer lines"
-    pi      int           "An index into the p buffer."
+    Sep     int           // Field separator character.
+    Trim    bool          // Remove excess whitespace from field values.
+    Cutset  string        // Set of characters to trim.
+    LastRow Row           // The last row read by the Reader.
+    r       io.Reader     // Base reader object.
+    br      *bufio.Reader // For reading lines.
+    p       []byte        // A buffer for longer lines
+    pi      int           // An index into the p buffer.
 }
 
 //  Create a new reader object.
@@ -66,7 +64,8 @@ func NewReaderSize(r io.Reader, size int) *Reader {
     return csvr
 }
 
-//  Read up to a new line and return a slice of string slices
+//  Attempt to read up to a new line. Return a Row object containing
+//  the fields read and any error encountered.
 func (csvr *Reader) ReadRow() Row {
     /* Read one row of the CSV and and return an array of the fields. */
     var (
@@ -94,8 +93,8 @@ func (csvr *Reader) ReadRow() Row {
         pLen := len(csvr.p)
         if csvr.p == nil {
             pLen := 2 * readLen
-            if pLen < ReaderBufferMinimumSize {
-                pLen = ReaderBufferMinimumSize
+            if pLen < readerBufferMinimumSize {
+                pLen = readerBufferMinimumSize
             }
             csvr.p = make([]byte, pLen, pLen)
             csvr.pi = 0
@@ -141,93 +140,65 @@ func (csvr *Reader) ReadRow() Row {
 }
 
 
-//  Read rows into a preallocated buffer. Any error encountered is
-//  returned. Returns the number of rows read in a single value return
-//  context any errors encountered (including os.EOF).
+//  Read rows into a preallocated buffer. Return the number of rows read,
+//  and any error encountered.
 func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
     var (
-        err     os.Error
-        numRead int = 0
-        n       int = len(rbuf)
+        i   int
+        err os.Error
     )
-    for i := 0; i < n; i++ {
-        r := csvr.ReadRow()
-        numRead++
-        if r.Error != nil {
-            err = r.Error
-            if r.Fields != nil {
-                rbuf[i] = r.Fields
-            }
-            break
+    csvr.DoN(len(rbuf), func(r Row)bool {
+        err = r.Error
+        if r.Fields != nil {
+            rbuf[i] = r.Fields
+            i++
         }
-        rbuf[i] = r.Fields
-    }
-    return numRead, err
+        return err != nil
+    } )
+    return i, err
 }
 
 //  Reads any remaining rows of CSV data in the underlying io.Reader.
-//  Uses resizing when a preallocated buffer of rows fills. Up to 16
-//  rows can be read without any doubling occuring.
 func (csvr *Reader) RemainingRows() (rows [][]string, err os.Error) {
     return csvr.RemainingRowsSize(16)
 }
 
 //  Like csvr.RemainingRows(), but allows specification of the initial
-//  row buffer capacity.
+//  row buffer capacity to avoid unnecessary reallocations.
 func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) {
     err = nil
     var rbuf [][]string = make([][]string, 0, size)
-    rit := csvr.RowIterAuto()
-    for r := range rit.RowsChan {
-        /*
-           if cap(rbuf) == len(rbuf) {
-               newbuf := make([][]string, len(rbuf), 2*len(rbuf))
-               copy(rbuf,newbuf)
-               rbuf = newbuf
-           }
-        */
+    csvr.Do(func(r Row)bool {
         if r.Error != nil {
             err = r.Error
             if r.Fields != nil {
                 rbuf = append(rbuf, r.Fields)
             }
-            break
+            return false
         }
         rbuf = append(rbuf, r.Fields)
-    }
+        return true
+    } )
     return rbuf, err
 }
 
 //  Iteratively read the remaining rows in the reader and call f on each
 //  of them. If f returns false, no more rows will be read.
 func (csvr *Reader) Do(f func(Row) bool) {
-    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
-        if r.HasEOF() {
-            break
-        }
-        f(r)
-    }
+    for r := csvr.ReadRow() ; !r.HasEOF() && f(r) ; r = csvr.ReadRow() { }
 }
 
 //  Process rows from the reader like Do, but stop after processing n of
 //  them. If f returns false before n rows have been process, no more rows
 //  will be processed.
 func (csvr *Reader) DoN(n int, f func(Row) bool) {
-    var (
-        i       int
-        fprime  = func(r Row) bool {
-            if i < n {
-                return f(r)
-            }
-            return false
+    var i int
+    csvr.Do( func(r Row) bool {
+        if i < n {
+            return f(r)
         }
-    )
-    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
-        if r.HasEOF() {
-            break
-        }
-        fprime(r)
-    }
+        return false
+    } )
 }
 
 //  A function routine for setting all the configuration variables of a
