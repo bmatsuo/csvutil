@@ -62,9 +62,8 @@ func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
 //  Write a slice of bytes to the data stream. No checking for containment
 //  of the separator is done, so this file can be used to write multiple
 //  fields if desired.
-func (csvw *Writer) write(p []byte) (nbytes int, err os.Error) {
-    nbytes, err = csvw.bw.Write(p)
-    return
+func (csvw *Writer) write(p []byte) (int, os.Error) {
+    return csvw.bw.Write(p)
 }
 /*
 //  Write a string to the data stream. No checking for containment of
@@ -102,16 +101,14 @@ func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
 func (csvw *Writer) writeField(field string, ln bool) (int, os.Error) {
     // Contains some code modified from
     //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
+    var trail int = csvw.Sep
+    if ln {
+        trail = '\n'
+    }
     var (
         fLen  = len(field)
         bp    = make([]byte, fLen+utf8.UTFMax)
-        trail int
     )
-    if ln {
-        trail = '\n'
-    } else {
-        trail = csvw.Sep
-    }
     copy(bp, field)
     return csvw.write(bp[:fLen+utf8.EncodeRune(bp[fLen:], trail)])
 }
@@ -119,14 +116,16 @@ func (csvw *Writer) writeField(field string, ln bool) (int, os.Error) {
 //  Write a slice of field values with a trailing field seperator (no '\n').
 //  Returns any error incurred from writing.
 func (csvw *Writer) WriteFields(fields...string) (int, os.Error) {
-    var n int = len(fields)
-    var success int = 0
-    var err os.Error
+    var(
+        n       = len(fields)
+        success int
+        err     os.Error
+    )
     for i := 0; i < n; i++ {
-        nbytes, err := csvw.writeField(fields[i], false)
-        success += nbytes
-        if nbytes < len(fields[i])+utf8.RuneLen(csvw.Sep) {
+        if nbytes, err := csvw.writeField(fields[i], false); err != nil {
             return success, err
+        } else {
+            success += nbytes
         }
     }
     return success, err
@@ -158,24 +157,19 @@ func (csvw *Writer) WriteFieldsln(fields...string) (int, os.Error) {
 // Write a slice of field values with a trailing new line '\n'.
 // Returns any error incurred from writing.
 func (csvw *Writer) WriteRow(fields...string) (int, os.Error) {
-    var n int = len(fields)
-    var success int = 0
-    var err os.Error
+    var (
+        n       = len(fields)
+        success int
+    )
     for i := 0; i < n; i++ {
         var onLastField bool = i == n-1
-        nbytes, err := csvw.writeField(fields[i], onLastField)
-        success += nbytes
-
-        var trail int = csvw.Sep
-        if onLastField {
-            trail = '\n'
-        }
-
-        if nbytes < len(fields[i])+utf8.RuneLen(trail) {
+        if nbytes, err := csvw.writeField(fields[i], onLastField); err != nil {
             return success, err
+        } else {
+            success += nbytes
         }
     }
-    return success, err
+    return success, nil
 }
 
 //  Flush any buffered data to the underlying io.Writer.
@@ -185,14 +179,12 @@ func (csvw *Writer) Flush() os.Error {
 
 //  Write multple CSV rows at once.
 func (csvw *Writer) WriteRows(rows [][]string) (int, os.Error) {
-    var success, nbytes int
-    var err os.Error
-    success = 0
+    var success int
     for i := 0; i < len(rows); i++ {
-        nbytes, err = csvw.WriteRow(rows[i]...)
-        success += nbytes
-        if err != nil {
+        if nbytes, err := csvw.WriteRow(rows[i]...); err != nil {
             return success, err
+        } else {
+            success += nbytes
         }
     }
     return success, nil
