@@ -58,9 +58,6 @@ Todo
 
 * Formatted reading/writing of CSV data.
 
-* Iteration of individual fields from a CSV data stream with a flag that
-indicates new rows.
-
 Install
 =======
 
