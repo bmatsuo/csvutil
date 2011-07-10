@@ -62,7 +62,6 @@ func Read(r io.Reader) ([][]string, os.Error) {
     return csvr.RemainingRows()
 }
 
-
 //  Read a named CSV file into a new slice of new string slices.
 func ReadFile(filename string) ([][]string, os.Error) {
     var (

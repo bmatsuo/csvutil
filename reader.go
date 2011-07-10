@@ -38,7 +38,6 @@ type Reader struct {
     Sep     int           // Field separator character.
     Trim    bool          // Remove excess whitespace from field values.
     Cutset  string        // Set of characters to trim.
-    LastRow Row           // The last row read by the Reader.
     r       io.Reader     // Base reader object.
     br      *bufio.Reader // For reading lines.
     p       []byte        // A buffer for longer lines
@@ -78,7 +77,6 @@ func (csvr *Reader) ReadRow() Row {
         b              byte
     )
     r = Row{Fields: nil, Error: nil}
-    csvr.LastRow = r
     isPrefix = true
     for isPrefix {
         readLine, isPrefix, err = csvr.br.ReadLine()
@@ -136,7 +134,6 @@ func (csvr *Reader) ReadRow() Row {
             r.Fields[i] = strings.Trim(r.Fields[i], csvr.Cutset)
         }
     }
-    csvr.LastRow = r
     return r
 }
 
