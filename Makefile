@@ -12,7 +12,6 @@ GOFILES=\
 	csv.go\
 	row.go\
 	reader.go\
-	iterator.go\
 	writer.go\
 	file.go\
 

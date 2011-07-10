@@ -26,6 +26,7 @@ import (
     "strings"
     "os"
     //"fmt"
+    //"log"
 )
 
 //  readerBufferMinimumSize is the smallest csvutil will allow the
@@ -153,7 +154,7 @@ func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
             rbuf[i] = r.Fields
             i++
         }
-        return r.HasError()
+        return !r.HasError()
     } )
     return i, err
 }
@@ -165,15 +166,18 @@ func (csvr *Reader) RemainingRows() (rows [][]string, err os.Error) {
 
 //  Like csvr.RemainingRows(), but allows specification of the initial
 //  row buffer capacity to avoid unnecessary reallocations.
-func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) {
-    err = nil
-    var rbuf [][]string = make([][]string, 0, size)
-    csvr.Do(func(r Row)bool {
+func (csvr *Reader) RemainingRowsSize(size int) ([][]string, os.Error) {
+    var (
+        err  os.Error
+        rbuf = make([][]string, 0, size)
+    )
+    csvr.Do(func(r Row) bool {
         err = r.Error
+        //log.Printf("Scanned %v", r)
         if r.Fields != nil {
             rbuf = append(rbuf, r.Fields)
         }
-        return r.HasError()
+        return !r.HasError()
     } )
     return rbuf, err
 }
@@ -181,7 +185,16 @@ func (csvr *Reader) RemainingRowsSize(size int) (rows [][]string, err os.Error) 
 //  Iteratively read the remaining rows in the reader and call f on each
 //  of them. If f returns false, no more rows will be read.
 func (csvr *Reader) Do(f func(Row) bool) {
-    for r := csvr.ReadRow() ; !r.HasEOF() && f(r) ; r = csvr.ReadRow() { }
+    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
+        if r.HasEOF() {
+            //log.Printf("EOF")
+            break
+        }
+        if !f(r) {
+            //log.Printf("Break")
+            break
+        }
+    }
 }
 
 //  Process rows from the reader like Do, but stop after processing n of
