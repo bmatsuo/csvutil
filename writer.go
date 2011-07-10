@@ -32,9 +32,9 @@ import (
 //  But, because of this, the method Flush() must be called to ensure
 //  data is written to any given io.Writer before it is closed.
 type Writer struct {
-    Sep int           "CSV Field seperator."
-    w   io.Writer     "Base writer object."
-    bw  *bufio.Writer "Base writer object."
+    Sep int           // CSV field seperator.
+    w   io.Writer     // Base writer object.
+    bw  *bufio.Writer // Buffering writer for efficiency.
 }
 
 //  Create a new CSV writer with the default field seperator and a
