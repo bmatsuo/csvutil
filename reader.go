@@ -165,14 +165,6 @@ func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
     return numRead, err
 }
 
-//  Convenience methor to read at most n rows from csvr. Simple allocates
-//  a row slice rs and calls csvr.ReadRows(rs). Returns the actual number
-//  of rows read and any error that occurred (and halted reading).
-func (csvr *Reader) ReadNRows(n int) (int, os.Error) {
-    rows := make([][]string, n)
-    return csvr.ReadRows(rows)
-}
-
 //  Reads any remaining rows of CSV data in the underlying io.Reader.
 //  Uses resizing when a preallocated buffer of rows fills. Up to 16
 //  rows can be read without any doubling occuring.
