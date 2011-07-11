@@ -31,7 +31,7 @@ func main() {
         if r.HasError() {
             panic(r.Error)
         }
-        person := Person{}
+        var person Person
         if _, errc := r.Format(&person); errc != nil {
             panic("Row is not a Person")
         }
