@@ -76,7 +76,7 @@ data structures and types.
 Todo
 ====
 
-* Enhance and clean the formatting API formatting of data.
+* Enhance and clean the formatting API and allow better formatting of data.
 
 Install
 =======
