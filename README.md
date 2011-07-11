@@ -55,8 +55,8 @@ bob,2,80
 chris,1.6,67
 ```
 
-When the above program is called and given a path argument 'in.csv', the
-following is printed to standard output.
+When the above program is called and given the path 'in.csv', the following
+is printed to standard output.
 
 ```
 alice,1.4,50,25.510204081632658
