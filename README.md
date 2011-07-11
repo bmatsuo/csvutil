@@ -3,7 +3,7 @@ csvutil - Your CSV pocket-knife (golang)
 Version
 =======
 
-    This is csvutil version 0.3_4
+    This is csvutil version 1.0_4
 
 Synopsis
 ========
@@ -11,24 +11,38 @@ Synopsis
 The csvutil package can be used to read CSV data from any io.Reader and,
 write CSV data to any io.Writer.
 
+```go
     package main
     import "os"
     import "github.com/bmatsuo/csvutil"
 
+    type Person struct {
+        Name   string
+        Height float64
+        Weight float64
+    }
+
     func main() {
         writer := csvutil.NewWriter(os.Stdout)
-        err := csvutil.DoFile(os.Args[1], func (r csvutil.Row) bool {
+        err := csvutil.DoFile(os.Args[1], func(r csvutil.Row) bool {
             if r.HasError() {
                 panic(r.Error)
             }
-            writer.WriteRow(r.Fields...)
+            person := Person{}
+            _, errc := r.Format(&person)
+            if errc != nil {
+                panic("Row is not a Person")
+            }
+            bmi := person.Height / (person.Weight * person.Weight)
+            writer.WriteRow(csvutil.FormatRow(person, bmi).Fields...)
             return true
-        } )
+        })
         if err != nil {
             panic(err)
         }
         writer.Flush()
     }
+```
 
 About
 =====
