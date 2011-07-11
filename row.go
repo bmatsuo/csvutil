@@ -158,17 +158,19 @@ func (r Row)formatValue(i int, x interface{}) (int, os.Error) {
     default:
         return 0, ErrorFieldType
     }
-    var elemValue = value.Elem()
-    var elemType = elemValue.Type()
-    var elemKind = elemType.Kind()
-    switch elemKind {
+    var(
+        eVal = value.Elem()
+        eType = eVal.Type()
+        eKind = eType.Kind()
+    )
+    switch eKind {
     // Format pointers to standard types.
     case reflect.Struct:
         switch kind {
         case reflect.Ptr:
-            n = elemValue.NumField()
+            n = eVal.NumField()
             for j := 0 ; j < n ; j++ {
-                var vj = elemValue.Field(j)
+                var vj = eVal.Field(j)
                 rvasgn, rverr := r.formatReflectValue(i+j, vj)
                 assigned += rvasgn
                 if rverr != nil {
@@ -183,9 +185,9 @@ func (r Row)formatValue(i int, x interface{}) (int, os.Error) {
         fallthrough
     case reflect.Slice:
         //log.Print("SliceType")
-        n = elemValue.Len()
+        n = eVal.Len()
         for j := 0 ; j < n ; j++ {
-            var vj = elemValue.Index(j)
+            var vj = eVal.Index(j)
             rvasgn, rverr := r.formatReflectValue(i+j, vj)
             assigned += rvasgn
             if rverr != nil {
@@ -193,8 +195,11 @@ func (r Row)formatValue(i int, x interface{}) (int, os.Error) {
             }
         }
         return assigned, errc
+    case reflect.Map:
+        //log.Print("MapType")
+        return 0, ErrorUnimplemented
     default:
-        assigned, errc = r.formatReflectValue(i, elemValue)
+        assigned, errc = r.formatReflectValue(i, eVal)
     }
     return assigned, errc
 }
