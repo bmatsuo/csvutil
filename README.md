@@ -15,36 +15,35 @@ types, or flat structs. It can also convert CSV rows and assign values to
 memory referenced by a slice of pointers.
 
 ```go
-    package main
-    import "os"
-    import "github.com/bmatsuo/csvutil"
+package main
+import "os"
+import "github.com/bmatsuo/csvutil"
 
-    type Person struct {
-        Name   string
-        Height float64
-        Weight float64
-    }
+type Person struct {
+    Name   string
+    Height float64
+    Weight float64
+}
 
-    func main() {
-        writer := csvutil.NewWriter(os.Stdout)
-        err := csvutil.DoFile(os.Args[1], func(r csvutil.Row) bool {
-            if r.HasError() {
-                panic(r.Error)
-            }
-            person := Person{}
-            _, errc := r.Format(&person)
-            if errc != nil {
-                panic("Row is not a Person")
-            }
-            bmi := person.Weight / (person.Height * person.Height)
-            writer.WriteRow(csvutil.FormatRow(person, bmi).Fields...)
-            return true
-        })
-        if err != nil {
-            panic(err)
+func main() {
+    writer := csvutil.NewWriter(os.Stdout)
+    errdo := csvutil.DoFile(os.Args[1], func(r csvutil.Row) bool {
+        if r.HasError() {
+            panic(r.Error)
         }
-        writer.Flush()
+        person := Person{}
+        if _, errc := r.Format(&person); errc != nil {
+            panic("Row is not a Person")
+        }
+        bmi := person.Weight / (person.Height * person.Height)
+        writer.WriteRow(csvutil.FormatRow(person, bmi).Fields...)
+        return true
+    })
+    if errdo != nil {
+        panic(errdo)
     }
+    writer.Flush()
+}
 ```
 
 Given a CSV file 'in.csv' with contents
