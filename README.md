@@ -47,6 +47,23 @@ memory referenced by a slice of pointers.
     }
 ```
 
+Given a CSV file 'in.csv' with contents
+
+```
+alice,1.4,50
+bob,2,80
+chris,1.6,67
+```
+
+When the above program is called and given a path argument 'in.csv', the
+following is printed to standard output.
+
+```
+alice,1.4,50,25.510204081632658
+bob,2,80,20
+chris,1.6,67,26.171874999999996
+```
+
 About
 =====
 

@@ -210,10 +210,9 @@ func (r Row) formatValue(i int, x interface{}) (int, os.Error) {
     return assigned, errc
 }
 
-//  *Unimplemented*. Should iteratively take values from the argument list
-//  and assign to them successive fields from the row object. Should
-//  return then number of row fields assigned to argument (fields) and any
-//  error that occurred.
+//  Iteratively take values from the argument list and assigns to them
+//  successive fields from the row object. Returns the number of row fields
+//  assigned to arguments and any error that occurred.
 func (r Row) Format(x ...interface{}) (int, os.Error) {
     var (
         assigned int
@@ -380,6 +379,10 @@ func formatValue(x interface{}) ([]string, os.Error) {
     return nil, errc
 }
 
+//  Iteratively take values from the argument list and formats them (or
+//  their elements/fields) as a (list of) string(s). Returns a Row object
+//  that contains the formatted arguments, as well as any error that
+//  occured.
 func FormatRow(x ...interface{}) Row {
     var (
         err          os.Error
