@@ -9,7 +9,10 @@ Synopsis
 ========
 
 The csvutil package can be used to read CSV data from any io.Reader and,
-write CSV data to any io.Writer.
+write CSV data to any io.Writer. It can automatically generate CSV rows
+from slices containing native Go types, other slices/arrays of native go
+types, or flat structs. It can also convert CSV rows and assign values to
+memory referenced by a slice of pointers.
 
 ```go
     package main
@@ -67,10 +70,13 @@ memory footprint.
 
 * Writing of individual writing fields/rows (along with batch writing).
 
+* Automated CSV row serialization and deserialization (formatting) for flat
+data structures and types.
+
 Todo
 ====
 
-* Formatted reading/writing of CSV data.
+* Enhance and clean the formatting API formatting of data.
 
 Install
 =======
