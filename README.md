@@ -36,7 +36,7 @@ memory referenced by a slice of pointers.
             if errc != nil {
                 panic("Row is not a Person")
             }
-            bmi := person.Height / (person.Weight * person.Weight)
+            bmi := person.Weight / (person.Height * person.Height)
             writer.WriteRow(csvutil.FormatRow(person, bmi).Fields...)
             return true
         })
