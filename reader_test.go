@@ -10,7 +10,7 @@ import (
 )
 
 func TestDo(T *testing.T) {
-    var csvStr string = makeTestCSVString()
+    var csvStr string = csvTestString1()
     var sreader *strings.Reader = strings.NewReader(csvStr)
     var csvr *Reader = NewReader(sreader, nil)
     var rowlen = -1
@@ -32,7 +32,7 @@ func TestDo(T *testing.T) {
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 func TestReadRow(T *testing.T) {
     T.Log("Beginning test\n")
-    var csvStr string = makeTestCSVString()
+    var csvStr string = csvTestString1()
     var sreader *strings.Reader = strings.NewReader(csvStr)
     var csvr *Reader = NewReader(sreader, nil)
     var n int = -1
@@ -61,7 +61,7 @@ func TestReadRow(T *testing.T) {
         i++
         return true
     })
-    var test_matrix [][]string = makeTestCSVMatrix()
+    var test_matrix [][]string = TestMatrix1
     var assert_val = func(i, j int) {
         if rows[i][j] != test_matrix[i][j] {
             T.Errorf("Unexpected value in (%d,%d), %s", i, j, rows[i][j])
@@ -75,3 +75,39 @@ func TestReadRow(T *testing.T) {
     T.Log("Finished test\n")
 }
 // END TEST1
+
+func TestComments(T *testing.T) {
+    // Create the test configuration.
+    var config = NewConfig()
+    config.Sep = '\t'
+    config.Comments = true
+
+    // Create a Reader for the test string and parse the rows.
+    var (
+        csvstr    = csvTestString2()
+        sreader   = strings.NewReader(csvstr)
+        reader    = NewReader(sreader, config)
+        rows, err = reader.RemainingRows()
+    )
+    if err != nil {
+        T.Error("Error:", err.String())
+    }
+    if len(rows) != len(TestMatrix2) {
+        T.Error("Different number of rows in parsed and original", len(rows), len(TestMatrix2))
+    }
+    for i, row := range rows {
+        if i >= len(TestMatrix2) {
+            break
+        }
+        for j, s := range row {
+            if j >= len(TestMatrix2[i]) {
+                T.Errorf("Row %d: different number of columns in parsed %d and original %d",
+                    i, len(row), len(TestMatrix2[i]))
+                break
+            }
+            if s != TestMatrix2[i][j] {
+                T.Errorf("'%s' != '%s' at (%d,%d)", s, TestMatrix2[i][j], i, j)
+            }
+        }
+    }
+}

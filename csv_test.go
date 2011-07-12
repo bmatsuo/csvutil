@@ -11,29 +11,20 @@ import (
 )
 
 
+
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 //  This is a simple test of the readers ability to return something of
 //  ideal input format in the proper internal form. the dimensions and
 //  values of the resulting parsed matrix are verified against the [][]string
 //  matrix which created the CSV data.
-func makeTestCSVMatrix() [][]string {
-    var testfields [][]string = make([][]string, 3)
-    for i := 0; i < 3; i++ {
-        testfields[i] = make([]string, 3)
-    }
-    testfields[0][0] = "field1"
-    testfields[0][1] = "field2"
-    testfields[0][2] = "field3"
-    testfields[1][0] = "Ben Franklin"
-    testfields[1][1] = "3.704"
-    testfields[1][2] = "10"
-    testfields[2][0] = "Tom Jefferson"
-    testfields[2][1] = "5.7"
-    testfields[2][2] = "15"
-    return testfields
-}
-func makeTestCSVString() string {
-    var testfields [][]string = makeTestCSVMatrix()
+var (
+    TestMatrix1 = [][]string{
+        []string{"field1", "field2", "field3"},
+        []string{"Ben Franklin", "3.704", "10"},
+        []string{"Tom Jefferson", "5.7", "15"}}
+)
+func csvTestString1() string {
+    var testfields [][]string = TestMatrix1
     var rows []string = make([]string, 4)
     rows[0] = strings.Join(testfields[0], ",")
     rows[1] = strings.Join(testfields[1], ",")
@@ -41,7 +32,32 @@ func makeTestCSVString() string {
     rows[3] = ""
     return strings.Join(rows, "\n")
 }
-func makeTestCSVInstance() ([][]string, string) {
-    return makeTestCSVMatrix(), makeTestCSVString()
+func csvTestInstance1() ([][]string, string) {
+    return TestMatrix1, csvTestString1()
 }
+
 // END TEST1
+
+//  TEST2 - 3x3 matrix w/ tab separators, w/o excess whitespace. And with
+//  leading '#' comments. 
+var (
+    TestMatrix2 = [][]string{
+        []string{"field1", "field2", "field3"},
+        []string{"Ben Franklin", "3.704", "10"},
+        []string{"Tom Jefferson", "5.7", "15"}}
+)
+func csvTestString2() string {
+    var testfields [][]string = TestMatrix2
+    var rows []string = make([]string, 5)
+    rows[0] = "# This is a comment string"
+    rows[0] = "# This another comment string"
+    rows[1] = strings.Join(testfields[0], "\t")
+    rows[2] = strings.Join(testfields[1], "\t")
+    rows[3] = strings.Join(testfields[2], "\t")
+    rows[4] = ""
+    return strings.Join(rows, "\n")
+}
+func csvTestInstance2() ([][]string, string) {
+    return TestMatrix2, csvTestString2()
+}
+// END TEST2

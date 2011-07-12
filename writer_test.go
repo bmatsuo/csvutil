@@ -16,7 +16,7 @@ func TestWriteRow(T *testing.T) {
     //var csvBuf []byte = make([]byte,0 , 200)
     var bwriter *bytes.Buffer = bytes.NewBufferString("")
     var csvw *Writer = NewWriter(bwriter, nil)
-    var csvMatrix = makeTestCSVMatrix()
+    var csvMatrix = TestMatrix1
     var n int = len(csvMatrix)
     var length = 0
     for i := 0; i < n; i++ {
@@ -40,7 +40,7 @@ func TestWriteRow(T *testing.T) {
     } else {
         T.Logf("Read %d bytes from the buffer.", len(output))
     }
-    var csvStr string = makeTestCSVString()
+    var csvStr string = csvTestString1()
     if output != csvStr {
         T.Errorf("Unexpected output.\n\nExpected:\n'%s'\nReceived:\n'%s'\n\n",
             csvStr, output)

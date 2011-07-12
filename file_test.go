@@ -36,7 +36,7 @@ var (
 func TestWriteFile(T *testing.T) {
     var testFilename string = TestOut
     defer cleanTestFile(testFilename, T)
-    mat, str := makeTestCSVInstance()
+    mat, str := csvTestInstance1()
     nbytes, err := WriteFile(testFilename, TestPerm, mat)
     if err != nil {
         T.Error(err)
@@ -61,7 +61,7 @@ func TestReadFile(T *testing.T) {
     var testFilename string = TestOut
     defer cleanTestFile(testFilename, T)
 
-    mat, str := makeTestCSVInstance()
+    mat, str := csvTestInstance1()
     err := ioutil.WriteFile(testFilename, bytes.NewBufferString(str).Bytes(), TestPerm)
     if err != nil {
         T.Error(err)
