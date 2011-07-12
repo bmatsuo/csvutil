@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 package csvutil
+
 import (
     "io"
     "bufio"
@@ -18,31 +19,36 @@ const readerBufferMinimumSize = 30
 
 //  A reader object for CSV data utilizing the bufio package.
 type Reader struct {
-    Sep     int           // Field separator character.
-    Trim    bool          // Remove excess whitespace from field values.
-    Cutset  string        // Set of characters to trim.
+    *Config
     r       io.Reader     // Base reader object.
     br      *bufio.Reader // Buffering for efficiency and line reading.
     p       []byte        // A buffer for longer lines
     pi      int           // An index into the p buffer.
+    lineNum int
 }
 
 //  Create a new reader object.
-func NewReader(r io.Reader) *Reader {
-    var csvr *Reader = new(Reader).Reset()
+func NewReader(r io.Reader, c *Config) *Reader {
+    var csvr *Reader = new(Reader)
+    if csvr.Config = c; c == nil {
+        csvr.Config = NewConfig()
+    }
     csvr.r = r
     csvr.br = bufio.NewReader(r)
     return csvr
 }
 
 //  Create a new reader with a buffer of a specified size.
-func NewReaderSize(r io.Reader, size int) *Reader {
-    var csvr *Reader = new(Reader).Reset()
+func NewReaderSize(r io.Reader, c *Config, size int) *Reader {
+    var csvr *Reader = new(Reader)
+    if csvr.Config = c; c == nil {
+        csvr.Config = NewConfig()
+    }
     csvr.r = r
-    var err os.Error
-    csvr.br, err = bufio.NewReaderSize(r, size)
-    if err != nil {
+    if br, err := bufio.NewReaderSize(r, size); err != nil {
         panic(err)
+    } else {
+        csvr.br = br
     }
     return csvr
 }
@@ -65,8 +71,8 @@ func (csvr *Reader) readLine() (string, os.Error) {
         }
         var (
             readLen = len(piece)
-            necLen = csvr.pi+readLen
-            pLen = len(csvr.p)
+            necLen  = csvr.pi + readLen
+            pLen    = len(csvr.p)
         )
         if pLen == 0 {
             if pLen = readerBufferMinimumSize; pLen < necLen {
@@ -94,19 +100,38 @@ func (csvr *Reader) readLine() (string, os.Error) {
     return s, nil
 }
 
-//  Attempt to read up to a new line. Return a Row object containing
-//  the fields read and any error encountered.
+//  Returns the number of lines of input read by the Reader
+func (csvr *Reader) LineNum() int {
+    return csvr.lineNum
+}
+
+//  Attempt to read up to a new line, skipping any comment lines found in
+//  the process. Return a Row object containing the fields read and any
+//  error encountered.
 func (csvr *Reader) ReadRow() Row {
-    /* Read one row of the CSV and and return an array of the fields. */
     var (
         r    Row
         line string
     )
-    if line, r.Error = csvr.readLine(); r.Error != nil {
-        return r
+    // Read lines until a non-comment line is found.
+    for true {
+        if line, r.Error = csvr.readLine(); r.Error != nil {
+            return r
+        }
+        csvr.lineNum++
+        if !csvr.Comments {
+            break
+        } else if !csvr.LooksLikeComment(line) {
+            break
+        } else if csvr.lineNum > 1 && !csvr.CommentsInBody {
+            break
+        }
     }
-    r.Fields = strings.FieldsFunc(
-        line, func(c int) bool { return c == csvr.Sep })
+
+    // Break the line up into fields.
+    r.Fields = strings.FieldsFunc(line, func(c int) bool { return csvr.IsSep(c) })
+
+    // Trim any unwanted characters.
     if csvr.Trim {
         for i := 0; i < len(r.Fields); i++ {
             r.Fields[i] = strings.Trim(r.Fields[i], csvr.Cutset)
@@ -123,14 +148,14 @@ func (csvr *Reader) ReadRows(rbuf [][]string) (int, os.Error) {
         i   int
         err os.Error
     )
-    csvr.DoN(len(rbuf), func(r Row)bool {
+    csvr.DoN(len(rbuf), func(r Row) bool {
         err = r.Error
         if r.Fields != nil {
             rbuf[i] = r.Fields
             i++
         }
         return !r.HasError()
-    } )
+    })
     return i, err
 }
 
@@ -153,14 +178,14 @@ func (csvr *Reader) RemainingRowsSize(size int) ([][]string, os.Error) {
             rbuf = append(rbuf, r.Fields)
         }
         return !r.HasError()
-    } )
+    })
     return rbuf, err
 }
 
 //  Iteratively read the remaining rows in the reader and call f on each
 //  of them. If f returns false, no more rows will be read.
 func (csvr *Reader) Do(f func(Row) bool) {
-    for r := csvr.ReadRow() ; true ; r = csvr.ReadRow() {
+    for r := csvr.ReadRow(); true; r = csvr.ReadRow() {
         if r.HasEOF() {
             //log.Printf("EOF")
             break
@@ -177,14 +202,15 @@ func (csvr *Reader) Do(f func(Row) bool) {
 //  will be processed.
 func (csvr *Reader) DoN(n int, f func(Row) bool) {
     var i int
-    csvr.Do( func(r Row) bool {
+    csvr.Do(func(r Row) bool {
         if i < n {
             return f(r)
         }
         return false
-    } )
+    })
 }
 
+/*
 //  A function routine for setting all the configuration variables of a
 //  csvutil.Reader in a single line.
 func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
@@ -193,12 +219,15 @@ func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
     csvr.Cutset = cutset
     return csvr
 }
+*/
 
+/*
 //  Reset a Reader's configuration to the defaults. This is mostly meant
 //  for internal use but is safe for general use.
 func (csvr *Reader) Reset() *Reader {
     return csvr.Configure(DefaultSep, DefaultTrim, DefaultCutset)
 }
+*/
 
 /* Comply with the reader interface. */
 /*

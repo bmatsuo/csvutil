@@ -13,6 +13,7 @@ GOFILES=\
 	row.go\
 	reader.go\
 	writer.go\
+	config.go\
 	file.go\
 
 include $(GOROOT)/src/Make.pkg

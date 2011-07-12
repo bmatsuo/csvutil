@@ -26,7 +26,7 @@ type Person struct {
 }
 
 func main() {
-    writer := csvutil.NewWriter(os.Stdout)
+    writer := csvutil.NewWriter(os.Stdout, nil)
     errdo := csvutil.DoFile(os.Args[1], func(r csvutil.Row) bool {
         if r.HasError() {
             panic(r.Error)

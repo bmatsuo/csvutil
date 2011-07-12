@@ -15,16 +15,18 @@ import (
 //  But, because of this, the method Flush() must be called to ensure
 //  data is written to any given io.Writer before it is closed.
 type Writer struct {
-    Sep int           // CSV field seperator.
+    *Config
     w   io.Writer     // Base writer object.
     bw  *bufio.Writer // Buffering writer for efficiency.
 }
 
 //  Create a new CSV writer with the default field seperator and a
 //  buffer of a default size.
-func NewWriter(w io.Writer) *Writer {
+func NewWriter(w io.Writer, c *Config) *Writer {
     csvw := new(Writer)
-    csvw.Sep = DefaultSep
+    if csvw.Config = c; c == nil {
+        csvw.Config = NewConfig()
+    }
     csvw.w = w
     csvw.bw = bufio.NewWriter(w)
     return csvw
@@ -33,9 +35,11 @@ func NewWriter(w io.Writer) *Writer {
 //  Create a new CSV writer using a buffer of at least n bytes.
 //
 //      See bufio.NewWriterSize(io.Writer, int) (*bufio.NewWriter).
-func NewWriterSize(w io.Writer, n int) (*Writer, os.Error) {
+func NewWriterSize(w io.Writer, c *Config, n int) (*Writer, os.Error) {
     csvw := new(Writer)
-    csvw.Sep = DefaultSep
+    if csvw.Config = c; c == nil {
+        csvw.Config = NewConfig()
+    }
     csvw.w = w
     var bufErr os.Error
     csvw.bw, bufErr = bufio.NewWriterSize(w, n)

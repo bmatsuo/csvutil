@@ -12,7 +12,7 @@ import (
 func TestDo(T *testing.T) {
     var csvStr string = makeTestCSVString()
     var sreader *strings.Reader = strings.NewReader(csvStr)
-    var csvr *Reader = NewReader(sreader)
+    var csvr *Reader = NewReader(sreader, nil)
     var rowlen = -1
     csvr.Do(func(r Row) bool {
         if r.HasError() {
@@ -34,7 +34,7 @@ func TestReadRow(T *testing.T) {
     T.Log("Beginning test\n")
     var csvStr string = makeTestCSVString()
     var sreader *strings.Reader = strings.NewReader(csvStr)
-    var csvr *Reader = NewReader(sreader)
+    var csvr *Reader = NewReader(sreader, nil)
     var n int = -1
     var rows [][]string
     var headrow Row = csvr.ReadRow()

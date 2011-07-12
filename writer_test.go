@@ -15,7 +15,7 @@ import (
 func TestWriteRow(T *testing.T) {
     //var csvBuf []byte = make([]byte,0 , 200)
     var bwriter *bytes.Buffer = bytes.NewBufferString("")
-    var csvw *Writer = NewWriter(bwriter)
+    var csvw *Writer = NewWriter(bwriter, nil)
     var csvMatrix = makeTestCSVMatrix()
     var n int = len(csvMatrix)
     var length = 0

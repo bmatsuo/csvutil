@@ -31,7 +31,7 @@ import (
 //  Write a slice of rows (string slices) to an io.Writer object.
 func Write(w io.Writer, rows [][]string) (int, os.Error) {
     var (
-        csvw        = NewWriter(w)
+        csvw        = NewWriter(w, nil)
         nbytes, err = csvw.WriteRows(rows)
     )
     if err != nil {
@@ -49,7 +49,7 @@ func WriteFile(filename string, perm uint32, rows [][]string) (int, os.Error) {
         out    *os.File
         nbytes int
         err    os.Error
-        mode   = os.O_WRONLY|os.O_CREATE|os.O_TRUNC
+        mode   = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
     )
     if out, err = os.OpenFile(filename, mode, perm); err != nil {
         return nbytes, err
@@ -62,7 +62,7 @@ func WriteFile(filename string, perm uint32, rows [][]string) (int, os.Error) {
 
 //  Read rows from an io.Reader until EOF is encountered.
 func Read(r io.Reader) ([][]string, os.Error) {
-    var csvr = NewReader(r)
+    var csvr = NewReader(r, nil)
     return csvr.RemainingRows()
 }
 
@@ -84,7 +84,7 @@ func ReadFile(filename string) ([][]string, os.Error) {
 
 //  Iteratively apply a function to Row objects read from an io.Reader.
 func Do(r io.Reader, f func(r Row) bool) {
-    var csvr = NewReader(r)
+    var csvr = NewReader(r, nil)
     csvr.Do(f)
 }
 
