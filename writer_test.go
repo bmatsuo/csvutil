@@ -7,15 +7,11 @@ package csvutil
 
 import (
     "testing"
-    "bytes"
 )
-
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 func TestWriteRow(T *testing.T) {
-    //var csvBuf []byte = make([]byte,0 , 200)
-    var bwriter *bytes.Buffer = bytes.NewBufferString("")
-    var csvw *Writer = NewWriter(bwriter, nil)
+    var csvw, buff = BufferWriter(nil)
     var csvMatrix = TestMatrix1
     var n int = len(csvMatrix)
     var length = 0
@@ -34,7 +30,7 @@ func TestWriteRow(T *testing.T) {
     if flushErr != nil {
         T.Errorf("Error flushing output; %v\n", flushErr)
     }
-    var output string = bwriter.String()
+    var output string = buff.String()
     if len(output) == 0 {
         T.Error("Read 0 bytes\n")
     } else {

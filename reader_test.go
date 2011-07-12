@@ -6,13 +6,10 @@ package csvutil
 
 import (
     "testing"
-    "strings"
 )
 
 func TestDo(T *testing.T) {
-    var csvStr string = csvTestString1()
-    var sreader *strings.Reader = strings.NewReader(csvStr)
-    var csvr *Reader = NewReader(sreader, nil)
+    var csvr *Reader = StringReader(csvTestString1(), nil)
     var rowlen = -1
     csvr.Do(func(r Row) bool {
         if r.HasError() {
@@ -32,9 +29,7 @@ func TestDo(T *testing.T) {
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 func TestReadRow(T *testing.T) {
     T.Log("Beginning test\n")
-    var csvStr string = csvTestString1()
-    var sreader *strings.Reader = strings.NewReader(csvStr)
-    var csvr *Reader = NewReader(sreader, nil)
+    var csvr *Reader = StringReader(csvTestString1(), nil)
     var n int = -1
     var rows [][]string
     var headrow Row = csvr.ReadRow()
@@ -84,9 +79,7 @@ func TestComments(T *testing.T) {
 
     // Create a Reader for the test string and parse the rows.
     var (
-        csvstr    = csvTestString2()
-        sreader   = strings.NewReader(csvstr)
-        reader    = NewReader(sreader, config)
+        reader    = StringReader(csvTestString2(), config)
         rows, err = reader.RemainingRows()
     )
     if err != nil {

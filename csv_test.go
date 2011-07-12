@@ -7,10 +7,19 @@
 package csvutil
 
 import (
+    "bytes"
     "strings"
 )
 
+func StringReader(s string, c *Config) *Reader {
+    sreader := strings.NewReader(s)
+    return NewReader(sreader, c)
+}
 
+func BufferWriter(c *Config) (*Writer, *bytes.Buffer) {
+    bwriter := bytes.NewBufferString("")
+    return NewWriter(bwriter, c), bwriter
+}
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
 //  This is a simple test of the readers ability to return something of
