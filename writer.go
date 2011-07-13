@@ -3,11 +3,13 @@
 // license that can be found in the LICENSE file.
 
 package csvutil
+
 import (
     "os"
     "io"
     "bufio"
     "utf8"
+    "bytes"
     //"strings"
 )
 
@@ -93,8 +95,8 @@ func (csvw *Writer) writeField(field string, ln bool) (int, os.Error) {
         trail = '\n'
     }
     var (
-        fLen  = len(field)
-        bp    = make([]byte, fLen+utf8.UTFMax)
+        fLen = len(field)
+        bp   = make([]byte, fLen+utf8.UTFMax)
     )
     copy(bp, field)
     return csvw.write(bp[:fLen+utf8.EncodeRune(bp[fLen:], trail)])
@@ -102,8 +104,8 @@ func (csvw *Writer) writeField(field string, ln bool) (int, os.Error) {
 
 //  Write a slice of field values with a trailing field seperator (no '\n').
 //  Returns any error incurred from writing.
-func (csvw *Writer) WriteFields(fields...string) (int, os.Error) {
-    var(
+func (csvw *Writer) WriteFields(fields ...string) (int, os.Error) {
+    var (
         n       = len(fields)
         success int
         err     os.Error
@@ -141,22 +143,42 @@ func (csvw *Writer) WriteFieldsln(fields...string) (int, os.Error) {
 }
 */
 
-// Write a slice of field values with a trailing new line '\n'.
-// Returns any error incurred from writing.
-func (csvw *Writer) WriteRow(fields...string) (int, os.Error) {
+//  Write a slice of field values with a trailing new line '\n'.
+//  Returns any error incurred from writing.
+func (csvw *Writer) WriteRow(fields ...string) (int, os.Error) {
     var (
         n       = len(fields)
         success int
     )
     for i := 0; i < n; i++ {
-        var onLastField bool = i == n-1
-        if nbytes, err := csvw.writeField(fields[i], onLastField); err != nil {
+        var EORow = i == n-1
+        if nbytes, err := csvw.writeField(fields[i], EORow); err != nil {
             return success, err
         } else {
             success += nbytes
         }
     }
     return success, nil
+}
+
+//  Write a comment. Each comment string given will start on a new line. If
+//  the string is contains multiple lines, comment prefixes will be added
+//  to each one. 
+func (csvw *Writer) WriteComments(comments ...string) (int, os.Error) {
+    var lines = [][]byte{[]byte{}}
+    for _, c := range comments {
+        var cp = make([]byte, len(c))
+        copy(cp, c)
+        lines = append(lines, bytes.Split(cp, []byte{'\n'})...)
+    }
+    if len(lines[len(lines)-1]) != 0 {
+        lines = append(lines, []byte{})
+    }
+    var join = make([]byte, len(csvw.CommentPrefix)+1)
+    join[0] = '\n'
+    copy(join[1:], csvw.CommentPrefix)
+    var comment = bytes.Join(lines, join)
+    return csvw.write(comment)
 }
 
 //  Flush any buffered data to the underlying io.Writer.

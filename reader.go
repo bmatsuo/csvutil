@@ -20,11 +20,12 @@ const readerBufferMinimumSize = 30
 //  A reader object for CSV data utilizing the bufio package.
 type Reader struct {
     *Config
-    r       io.Reader     // Base reader object.
-    br      *bufio.Reader // Buffering for efficiency and line reading.
-    p       []byte        // A buffer for longer lines
-    pi      int           // An index into the p buffer.
-    lineNum int
+    r          io.Reader     // Base reader object.
+    br         *bufio.Reader // Buffering for efficiency and line reading.
+    p          []byte        // A buffer for longer lines
+    pi         int           // An index into the p buffer.
+    lineNum    int
+    pastHeader bool
 }
 
 //  Create a new reader object.
@@ -123,10 +124,11 @@ func (csvr *Reader) ReadRow() Row {
             break
         } else if !csvr.LooksLikeComment(line) {
             break
-        } else if csvr.lineNum > 1 && !csvr.CommentsInBody {
+        } else if csvr.pastHeader && !csvr.CommentsInBody {
             break
         }
     }
+    csvr.pastHeader = true
 
     // Break the line up into fields.
     r.Fields = strings.FieldsFunc(line, func(c int) bool { return csvr.IsSep(c) })
