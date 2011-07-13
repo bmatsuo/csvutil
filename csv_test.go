@@ -56,16 +56,16 @@ var (
         []string{"Ben Franklin", "3.704", "10"},
         []string{"Tom Jefferson", "5.7", "15"}}
     TestMatrix2Comments = []string{
-        "This is a comment string",
-        "This another comment string"}
+        " This is a comment string",
+        " This another comment string"}
 )
 
 func csvTestString2() string {
     var testfields = TestMatrix2
     var comments = TestMatrix2Comments
     var rows = make([]string, 6)
-    rows[0] = strings.Join([]string{"#", comments[0]}, " ")
-    rows[1] = strings.Join([]string{"#", comments[1]}, " ")
+    rows[0] = strings.Join([]string{"#", comments[0]}, "")
+    rows[1] = strings.Join([]string{"#", comments[1]}, "")
     rows[2] = strings.Join(testfields[0], "\t")
     rows[3] = strings.Join(testfields[1], "\t")
     rows[4] = strings.Join(testfields[2], "\t")

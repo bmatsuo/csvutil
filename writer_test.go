@@ -43,3 +43,21 @@ func TestWriteRow(T *testing.T) {
     }
 }
 // END TEST1
+
+func TestWriterComments(T *testing.T) {
+    var config = NewConfig()
+    config.Sep = '\t'
+    var (
+        matrix       = TestMatrix2
+        comments     = TestMatrix2Comments
+        verification = csvTestString2()
+        writer, buff = BufferWriter(config)
+    )
+    writer.WriteComments(comments...)
+    writer.WriteRows(matrix)
+    writer.Flush()
+    var output = buff.String()
+    if output != verification {
+        T.Errorf("Error writing comments\n\n'%s'\n'%s'", verification, output)
+    }
+}

@@ -162,23 +162,36 @@ func (csvw *Writer) WriteRow(fields ...string) (int, os.Error) {
 }
 
 //  Write a comment. Each comment string given will start on a new line. If
-//  the string is contains multiple lines, comment prefixes will be added
-//  to each one. 
+//  the string is contains multiple lines, comment prefixes will be
+//  inserted at the beginning of each one.
 func (csvw *Writer) WriteComments(comments ...string) (int, os.Error) {
-    var lines = [][]byte{[]byte{}}
+    if len(comments) == 0 {
+        return 0, nil
+    }
+
+    // Break the comments into lines (w/o trailing '\n' chars)
+    var lines [][]byte
     for _, c := range comments {
         var cp = make([]byte, len(c))
         copy(cp, c)
         lines = append(lines, bytes.Split(cp, []byte{'\n'})...)
     }
-    if len(lines[len(lines)-1]) != 0 {
-        lines = append(lines, []byte{})
+
+    // Count the total number of characters in the comments.
+    var commentLen = len(lines) * (len(csvw.CommentPrefix) + 1)
+    for _, cline := range lines {
+        commentLen += len(cline)
     }
-    var join = make([]byte, len(csvw.CommentPrefix)+1)
-    join[0] = '\n'
-    copy(join[1:], csvw.CommentPrefix)
-    var comment = bytes.Join(lines, join)
-    return csvw.write(comment)
+
+    // Allocate, fill, and write the comment byte slice
+    var comment = make([]byte, commentLen)
+    var ci int
+    for _, cline := range lines {
+        ci += copy(comment[ci:], csvw.CommentPrefix)
+        ci += copy(comment[ci:], cline)
+        ci += copy(comment[ci:], []byte{'\n'})
+    }
+    return csvw.write(comment[:ci])
 }
 
 //  Flush any buffered data to the underlying io.Writer.
