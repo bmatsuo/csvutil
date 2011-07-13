@@ -3,7 +3,7 @@ csvutil - Your CSV pocket-knife (golang)
 Version
 =======
 
-    This is csvutil version 1.0_4
+    This is csvutil version 1.1_2
 
 Synopsis
 ========
