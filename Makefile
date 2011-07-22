@@ -9,11 +9,11 @@ include $(GOROOT)/src/Make.inc
 
 TARG=csvutil
 GOFILES=\
-	csv.go\
 	row.go\
 	reader.go\
 	writer.go\
 	config.go\
 	file.go\
+	csvutil.go\
 
 include $(GOROOT)/src/Make.pkg
