@@ -12,7 +12,7 @@ import ()
 type Config struct {
     // General configuration
     //  Field seperator
-    Sep int
+    Sep rune
     //  Trim leading/trailing whitespace in fields.
     Trim bool
     //  Characters to trim from fields.
@@ -46,6 +46,6 @@ func (c *Config) LooksLikeComment(line string) bool {
     return line[:len(c.CommentPrefix)] == c.CommentPrefix
 }
 
-func (c *Config) IsSep(rune int) bool {
+func (c *Config) IsSep(rune rune) bool {
     return rune == c.Sep
 }
