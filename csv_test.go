@@ -7,18 +7,18 @@
 package csvutil
 
 import (
-    "bytes"
-    "strings"
+	"bytes"
+	"strings"
 )
 
 func StringReader(s string, c *Config) *Reader {
-    sreader := strings.NewReader(s)
-    return NewReader(sreader, c)
+	sreader := strings.NewReader(s)
+	return NewReader(sreader, c)
 }
 
 func BufferWriter(c *Config) (*Writer, *bytes.Buffer) {
-    bwriter := bytes.NewBufferString("")
-    return NewWriter(bwriter, c), bwriter
+	bwriter := bytes.NewBufferString("")
+	return NewWriter(bwriter, c), bwriter
 }
 
 // TEST1 - Simple 3x3 matrix w/ comma separators and w/o excess whitespace.
@@ -27,52 +27,53 @@ func BufferWriter(c *Config) (*Writer, *bytes.Buffer) {
 //  values of the resulting parsed matrix are verified against the [][]string
 //  matrix which created the CSV data.
 var (
-    TestMatrix1 = [][]string{
-        []string{"field1", "field2", "field3"},
-        []string{"Ben Franklin", "3.704", "10"},
-        []string{"Tom Jefferson", "5.7", "15"}}
+	TestMatrix1 = [][]string{
+		[]string{"field1", "field2", "field3"},
+		[]string{"Ben Franklin", "3.704", "10"},
+		[]string{"Tom Jefferson", "5.7", "15"}}
 )
 
 func csvTestString1() string {
-    var testfields [][]string = TestMatrix1
-    var rows []string = make([]string, 4)
-    rows[0] = strings.Join(testfields[0], ",")
-    rows[1] = strings.Join(testfields[1], ",")
-    rows[2] = strings.Join(testfields[2], ",")
-    rows[3] = ""
-    return strings.Join(rows, "\n")
+	var testfields [][]string = TestMatrix1
+	var rows []string = make([]string, 4)
+	rows[0] = strings.Join(testfields[0], ",")
+	rows[1] = strings.Join(testfields[1], ",")
+	rows[2] = strings.Join(testfields[2], ",")
+	rows[3] = ""
+	return strings.Join(rows, "\n")
 }
 func csvTestInstance1() ([][]string, string) {
-    return TestMatrix1, csvTestString1()
+	return TestMatrix1, csvTestString1()
 }
 
 // END TEST1
 
 //  TEST2 - 3x3 matrix w/ tab separators, w/o excess whitespace. And with
-//  leading '#' comments. 
+//  leading '#' comments.
 var (
-    TestMatrix2 = [][]string{
-        []string{"field1", "field2", "field3"},
-        []string{"Ben Franklin", "3.704", "10"},
-        []string{"Tom Jefferson", "5.7", "15"}}
-    TestMatrix2Comments = []string{
-        " This is a comment string",
-        " This another comment string"}
+	TestMatrix2 = [][]string{
+		[]string{"field1", "field2", "field3"},
+		[]string{"Ben Franklin", "3.704", "10"},
+		[]string{"Tom Jefferson", "5.7", "15"}}
+	TestMatrix2Comments = []string{
+		" This is a comment string",
+		" This another comment string"}
 )
 
 func csvTestString2() string {
-    var testfields = TestMatrix2
-    var comments = TestMatrix2Comments
-    var rows = make([]string, 6)
-    rows[0] = strings.Join([]string{"#", comments[0]}, "")
-    rows[1] = strings.Join([]string{"#", comments[1]}, "")
-    rows[2] = strings.Join(testfields[0], "\t")
-    rows[3] = strings.Join(testfields[1], "\t")
-    rows[4] = strings.Join(testfields[2], "\t")
-    rows[5] = ""
-    return strings.Join(rows, "\n")
+	var testfields = TestMatrix2
+	var comments = TestMatrix2Comments
+	var rows = make([]string, 6)
+	rows[0] = strings.Join([]string{"#", comments[0]}, "")
+	rows[1] = strings.Join([]string{"#", comments[1]}, "")
+	rows[2] = strings.Join(testfields[0], "\t")
+	rows[3] = strings.Join(testfields[1], "\t")
+	rows[4] = strings.Join(testfields[2], "\t")
+	rows[5] = ""
+	return strings.Join(rows, "\n")
 }
 func csvTestInstance2() ([][]string, string) {
-    return TestMatrix2, csvTestString2()
+	return TestMatrix2, csvTestString2()
 }
+
 // END TEST2

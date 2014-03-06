@@ -4,9 +4,9 @@
 
 package csvutil
 
-/* 
+/*
 *  File: row.go
-*  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
+*  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu]
 *  Created: Wed Jun  1 16:48:20 PDT 2011
 *  Description: Row related types and methods.
  */

@@ -4,9 +4,9 @@
 
 package csvutil
 
-/* 
+/*
 *  File: file.go
-*  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu] 
+*  Author: Bryan Matsuo [bmatsuo@soe.ucsc.edu]
 *  Created: Sun May 29 23:14:48 PDT 2011
 *
 *   This file is part of csvutil.
@@ -44,7 +44,7 @@ func Write(w io.Writer, rows [][]string) (int, error) {
 //  Write CSV data to a named file. If the file does not exist, it is
 //  created. If the file exists, it is truncated upon opening. Requires
 //  that file permissions be specified. Recommended permissions are 0600,
-//  0622, and 0666 (6:rw, 4:w, 2:r). 
+//  0622, and 0666 (6:rw, 4:w, 2:r).
 func WriteFile(filename string, perm os.FileMode, rows [][]string) (int, error) {
 	var (
 		out    *os.File
