@@ -4,12 +4,12 @@ package csvutil
  *  Filename:    config_test.go
  *  Author:      Bryan Matsuo <bmatsuo@soe.ucsc.edu>
  *  Created:     Tue Jul 12 01:56:03 PDT 2011
- *  Description: 
+ *  Description:
  *  Usage:       gotest
  */
 import (
+	"github.com/dersebi/golang_exp/exp/utf8string"
 	"testing"
-	"unicode/utf8"
 )
 
 //  Some rediculously dumb tests of Config methods, which are very simple.
@@ -28,7 +28,7 @@ func TestConfig(T *testing.T) {
 	// Test seperator detection.
 	config.Sep = '\t'
 	var str = "\t"
-	var utf8str = utf8.NewString(str)
+	var utf8str = utf8string.NewString(str)
 	if !config.IsSep(utf8str.At(0)) {
 		T.Error("Did not correctly identify a \\t separator")
 	}
