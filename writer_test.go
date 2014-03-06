@@ -18,7 +18,7 @@ func TestWriteRow(T *testing.T) {
     for i := 0; i < n; i++ {
         nbytes, err := csvw.WriteRow(csvMatrix[i]...)
         if err != nil {
-            T.Errorf("Write error: %s\n", err.String())
+            T.Errorf("Write error: %s\n", err.Error())
         }
         errFlush := csvw.Flush()
         if errFlush != nil {

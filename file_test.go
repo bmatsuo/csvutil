@@ -14,15 +14,15 @@ import (
 
 func cleanTestFile(f string, T *testing.T) {
     _, statErr := os.Stat(f)
-    if statErr == os.ENOENT {
+    if os.IsNotExist(statErr) {
         return
     }
     if statErr != nil {
-        T.Errorf("Error stat'ing the test file %s; %s\n", f, statErr.String())
+        T.Errorf("Error stat'ing the test file %s; %s\n", f, statErr.Error())
     }
     rmErr := os.Remove(f)
     if rmErr != nil {
-        T.Error("Error removing the test file %s; %s\n", f, rmErr.String())
+        T.Error("Error removing the test file %s; %s\n", f, rmErr.Error())
     }
 }
 
@@ -30,7 +30,7 @@ func cleanTestFile(f string, T *testing.T) {
 var (
     TestIn   string = "_test-csvutil-01-i.csv"
     TestOut  string = "_test-csvutil-01-o.csv"
-    TestPerm uint32 = 0622
+    TestPerm os.FileMode = 0622
 )
 
 func TestWriteFile(T *testing.T) {
@@ -68,7 +68,7 @@ func TestReadFile(T *testing.T) {
     }
     inputMat, csvErr := ReadFile(testFilename)
     if csvErr != nil {
-        T.Errorf("CSV reading error: %s", err.String())
+        T.Errorf("CSV reading error: %s", err.Error())
     }
     T.Logf("\nExpected;\n'%v'\n Received:\n'%v'\n\n", mat, inputMat)
     if len(inputMat) != len(mat) {

@@ -27,9 +27,12 @@ func TestConfig(T *testing.T) {
 
 	// Test seperator detection.
 	config.Sep = '\t'
-	var str = "\t"
-	var utf8str = utf8.NewString(str)
-	if !config.IsSep(utf8str.At(0)) {
+	str := "\t"
+	c, n := utf8.DecodeRuneInString(str)
+	if c == utf8.RuneError && n == 1 {
+		T.Errorf("Could not decode rune in string %q", str)
+	}
+	if !config.IsSep(c) {
 		T.Error("Did not correctly identify a \\t separator")
 	}
 	if config.IsSep(52) {

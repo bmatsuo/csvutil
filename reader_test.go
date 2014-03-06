@@ -83,7 +83,7 @@ func TestComments(T *testing.T) {
         rows, err = reader.RemainingRows()
     )
     if err != nil {
-        T.Error("Error:", err.String())
+        T.Error("Error:", err.Error())
     }
     if len(rows) != len(TestMatrix2) {
         T.Error("Different number of rows in parsed and original", len(rows), len(TestMatrix2))

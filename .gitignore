@@ -4,3 +4,4 @@ _test
 _testmain.go
 _obj
 synopsis
+*.test
