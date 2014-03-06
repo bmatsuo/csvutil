@@ -8,9 +8,6 @@ import (
 	"bufio"
 	"io"
 	"strings"
-
-	//"fmt"
-	//"log"
 )
 
 //  readerBufferMinimumSize is the smallest csvutil will allow the
@@ -87,9 +84,6 @@ func (csvr *Reader) readLine() (string, error) {
 		}
 		csvr.pi += copy(csvr.p[csvr.pi:], piece)
 	}
-	//var p = make([]byte, csvr.pi)
-	//copy(p, csvr.p[:csvr.pi])
-	//return p, nil
 	var s = string(csvr.p[:csvr.pi])
 	for i := 0; i < csvr.pi; i++ {
 		csvr.p[i] = 0
@@ -207,29 +201,3 @@ func (csvr *Reader) DoN(n int, f func(Row) bool) {
 		return false
 	})
 }
-
-/*
-//  A function routine for setting all the configuration variables of a
-//  csvutil.Reader in a single line.
-func (csvr *Reader) Configure(sep int, trim bool, cutset string) *Reader {
-    csvr.Sep = sep
-    csvr.Trim = trim
-    csvr.Cutset = cutset
-    return csvr
-}
-*/
-
-/*
-//  Reset a Reader's configuration to the defaults. This is mostly meant
-//  for internal use but is safe for general use.
-func (csvr *Reader) Reset() *Reader {
-    return csvr.Configure(DefaultSep, DefaultTrim, DefaultCutset)
-}
-*/
-
-/* Comply with the reader interface. */
-/*
-func (csvr*Reader) Read(b []byte) (n int, err os.Error) {
-	return csvr.r.Read(b)
-}
-*/

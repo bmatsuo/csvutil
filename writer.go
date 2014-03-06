@@ -53,35 +53,6 @@ func (csvw *Writer) write(p []byte) (int, error) {
 	return csvw.bw.Write(p)
 }
 
-/*
-//  Write a string to the data stream. No checking for containment of
-//  the separator is done, so this file can be used to write multiple
-//  fields if desired. 
-func (csvw *Writer) WriteString(str string) (nbytes int, err os.Error) {
-    var b []byte = make([]byte, len(str))
-    copy(b, str)
-    return csvw.write(b)
-}
-
-//  Attempt to write a string to underlying io.Writer, but panic if a
-//  separator character found in the stream.
-func (csvw *Writer) WriteStringSafe(str string) (nbytes int, err os.Error) {
-    // Some code modified from
-    //  $GOROOT/src/pkg/fmt/print.go: func (p *pp) fmtC(c int64) @ ~317,322
-    var rb []byte = make([]byte, utf8.UTFMax)
-    //Do I want int64 separators?
-    //rune := int(c) 
-    //if int64(rune) != c { rune = utf8.RuneError }
-    w := utf8.EncodeRune(rb, csvw.Sep)
-    var sep string = string(rb[0:w])
-    var i int = strings.Index(str, sep)
-    if i != -1 {
-        panic("sepfound")
-    }
-    return csvw.WriteString(str)
-}
-*/
-
 //  Write a single field of CSV data. If the ln argument is true, a
 //  trailing new line is printed after the field. Otherwise, when
 //  the ln argument is false, a separator character is printed after
