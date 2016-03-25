@@ -121,7 +121,7 @@ func (csvr *Reader) ReadRow() Row {
 	csvr.pastHeader = true
 
 	// Break the line up into fields.
-	r.Fields = strings.FieldsFunc(line, func(c rune) bool { return csvr.IsSep(c) })
+	r.Fields = strings.Split(line, string(csvr.Sep))
 
 	// Trim any unwanted characters.
 	if csvr.Trim {
