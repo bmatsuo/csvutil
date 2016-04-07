@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//  Package csvutils provides formatted reading and writing of CSV data.
+//  Package csvutil is not maintained.  It provides formatted reading and writing of CSV data.
 package csvutil
 
 import ()
