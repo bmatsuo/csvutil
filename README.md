@@ -1,7 +1,9 @@
 csvutil - Your CSV pocket-knife (golang)
 
-I would advise against using this package. It was a language learning 
-exercise from a time before "encoding/csv" existed.
+#WARNING
+
+**I would advise against using this package. It was a language learning 
+exercise from a time before "encoding/csv" existed. If encoding/csv doesn't fit your needs I would advise finding a different maintained package or writing a new one**
 
 Version
 =======
