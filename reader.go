@@ -79,8 +79,7 @@ func (csvr *Reader) readLine() (string, error) {
 			if pLen = 2 * pLen; pLen < necLen {
 				pLen = necLen
 			}
-			var p = make([]byte, pLen)
-			copy(p, csvr.p[:csvr.pi])
+			csvr.p = append(csvr.p, make([]byte, pLen)...)
 		}
 		csvr.pi += copy(csvr.p[csvr.pi:], piece)
 	}
@@ -122,7 +121,7 @@ func (csvr *Reader) ReadRow() Row {
 	csvr.pastHeader = true
 
 	// Break the line up into fields.
-	r.Fields = strings.FieldsFunc(line, func(c rune) bool { return csvr.IsSep(c) })
+	r.Fields = strings.Split(line, string(csvr.Sep))
 
 	// Trim any unwanted characters.
 	if csvr.Trim {
